@@ -12,6 +12,7 @@ from holodeck.command import *
 from holodeck.exceptions import HolodeckException
 from holodeck.sensors import Sensors
 from holodeck.shmemclient import ShmemClient
+from holodeck.unitconverter import WorldUnitMapper, CoordinateFrames
 
 
 class AgentDefinition(object):
@@ -108,6 +109,12 @@ class HolodeckEnvironment(object):
         # self._commands holds commands that are queued up to write to the command buffer on tick.
         self._commands = CommandsGroup()
         self._should_write_to_command_buffer = False
+
+        # Set up unit conversion
+        self._frontend_units = WorldUnitMapper()
+        self._backend_units = WorldUnitMapper()
+        self._backend_units.set_coordinate_frame(CoordinateFrames.left_handed)
+        #todo(Mitchell): Find a good place in the flow of data to convert it back and forth. It'll probably be in the get_single_state and step functions, etc.
 
         self._client.acquire()
 

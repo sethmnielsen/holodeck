@@ -1,6 +1,5 @@
-import pint
 import enum
-
+from pint import UnitRegistry
 from holodeck import HolodeckException
 
 
@@ -43,16 +42,22 @@ class UnitConverter:
 
 class WorldUnitMapper:
     def __init__(self):
-        register = pint.UnitRegistry()
-        self.length = register.meter
-        self.weight = register.kg
+        self.register = UnitRegistry()
+        self.length = self.register.cm
+        self.weight = self.register.kg
         self.coordinate_frame = CoordinateFrames.right_handed
 
     def set_weight(self, weight):
-        self.weight = weight
+        if isinstance(weight, str):
+            self.weight = getattr(self.register, weight)()
+        else:
+            self.weight = weight
 
     def set_length(self, length):
-        self.length = length
+        if isinstance(length, str):
+            self.weight = getattr(self.register, length)()
+        else:
+            self.length = length
 
     def set_coordinate_frame(self, coordinate_frame):
         self.coordinate_frame = coordinate_frame
