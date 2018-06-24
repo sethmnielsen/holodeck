@@ -1,30 +1,44 @@
 import pint
 import enum
 
+from holodeck import HolodeckException
+
 
 class UnitConverter:
-    def __init__(self):
-        self.sourceUnits = WorldUnitMapper()
-        self.targetUnits = WorldUnitMapper()
+    def __init__(self, source_units, target_units):
+        self._source_units = source_units if source_units is not None else WorldUnitMapper()
+        self._target_units = target_units if target_units is not None else WorldUnitMapper()
 
     @staticmethod
-    def _convert_units(length, source, target) :
+    def _convert_units(length, source, target):
         return length * target / source
 
     def to_target_length(self, length):
-        return self.convert_units(length, self.sourceUnits.get_length_units(), self.targetUnits.get_length_units())
+        return self.convert_units(length, self._source_units.get_length_units(), self._target_units.get_length_units())
 
     def to_source_length(self, length):
-        return self.convert_units(length, self.targetUnits.get_length_units(), self.sourceUnits.get_length_units())
+        return self.convert_units(length, self._target_units.get_length_units(), self._source_units.get_length_units())
 
     def to_target_weight(self, weight):
-        return self.convert_units(weight, self.sourceUnits.get_weight_units(), self.targetUnits.get_weight_units())
+        return self.convert_units(weight, self._source_units.get_weight_units(), self._target_units.get_weight_units())
 
     def to_source_weight(self, weight):
-        return self.convert_units(weight, self.targetUnits.get_weight_units(), self.sourceUnits.get_weight_units())
+        return self.convert_units(weight, self._target_units.get_weight_units(), self._source_units.get_weight_units())
 
-    def _convert_coordinate(self, coordinatem, source, target):
-        return "notImplemented"
+    @staticmethod
+    def _convert_coordinate(coordinate, source, target):
+        if source.get_coordinate_frame == target.get_coordinate_frame:
+            return  # do nothing
+        if isinstance(coordinate, list) and len(coordinate) == 3:
+            coordinate[1] *= -1
+        else:
+            raise HolodeckException("You must pass a list of 3 elements to successfully convert the coordinates")
+
+    def set_source_units(self, source_units):
+        self._source_units = source_units
+
+    def set_target_units(self, target_units):
+        self._target_units = target_units
 
 
 class WorldUnitMapper:
