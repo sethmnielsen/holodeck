@@ -173,6 +173,10 @@ class HolodeckEnvironment(object):
         Positional arguments:
         action -- An action for the main agent to carry out on the next tick
         """
+        #todo: figure out how to implement this loop properly. 
+        for item in action:
+
+
         self._agent.act(action)
 
         self._handle_command_buffer()
