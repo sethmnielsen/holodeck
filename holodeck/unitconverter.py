@@ -5,8 +5,8 @@ from pint import UnitRegistry
 
 class UnitConverter:
     def __init__(self, source_units, target_units):
-        self._source_units = source_units if source_units is not None else WorldUnitMapper()
-        self._target_units = target_units if target_units is not None else WorldUnitMapper()
+        self._source_units = source_units if source_units is not None else WorldUnits()
+        self._target_units = target_units if target_units is not None else WorldUnits()
 
     @staticmethod
     def _convert_units(length, source, target):
@@ -40,7 +40,7 @@ class UnitConverter:
         self._target_units = target_units
 
 
-class WorldUnitMapper:
+class WorldUnits:
     def __init__(self):
         self.register = UnitRegistry()
         self.length = self.register.cm

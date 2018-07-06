@@ -11,6 +11,13 @@ def uav_example():
     """A basic example of how to use the UAV agent."""
     env = holodeck.make("UrbanCity")
 
+    # This is an example of changing the units of measure for the frontend. It is not advisable to change the backend.
+    units = WorldUnits()
+    units.set_coordinate_frame(CoordinateFrames.right_handed)
+    units.set_length("mile")
+    units.set_weight("pound")
+    env.set_frontend_units(units)
+
     for i in range(10):
         env.reset()
 
