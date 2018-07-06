@@ -12,9 +12,10 @@ class HolodeckAgent(object):
         self.__act__(action)
 
     def teleport(self, location):
+        # TODO(Mitch) : make sure to convert the location of the teleport at some point.
         # The default teleport function is to copy the data to the buffer and set the bool to true
         # It can be overridden if needs be.
-        np.copyto(self._teleport_buffer, location)
+        np.copyto(self._teleport_buffer, location) # TODO (mitch) this is one instance of np.copyto where we should use units.
         np.copyto(self._teleport_bool_buffer, True)
 
     @property
@@ -27,7 +28,7 @@ class HolodeckAgent(object):
     def __act__(self, action):
         # The default act function is to copy the data,
         # but if needed it can be overridden
-        np.copyto(self._action_buffer, action)
+        np.copyto(self._action_buffer, action) # TODO (mitch) this is one instance of np.copyto where we should use units.
 
     def __repr__(self):
         return "HolodeckAgent"
@@ -75,7 +76,7 @@ class DiscreteSphereAgent(HolodeckAgent):
         actions = np.array([[2, 0], [-2, 0], [0, 2], [0, -2]])
         to_act = np.array(actions[action, :])
 
-        np.copyto(self._action_buffer, to_act)
+        np.copyto(self._action_buffer, to_act) # TODO this is one instance of np.copyto where we should use units.
 
     def __repr__(self):
         return "DiscreteSphereAgent"

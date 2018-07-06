@@ -72,11 +72,11 @@ class HolodeckEnvironment(object):
         uuid -- A unique identifier, used when running multiple instances of holodeck (default "")
         gl_version -- The version of OpenGL to use for Linux (default 4)
         """
-        self._height = height
-        self._width = width
+        self._height = height  # TODO this is one instance where we should use units.
+        self._width = width  # TODO this is one instance where we should use units.
         self._uuid = uuid
 
-        Sensors.set_primary_cam_size(height, width)
+        Sensors.set_primary_cam_size(height, width)  # TODO this is one instance where we should use units?
 
         if start_world:
             if os.name == "posix":

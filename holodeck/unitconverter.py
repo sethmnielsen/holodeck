@@ -1,6 +1,6 @@
 import enum
+from .exceptions import HolodeckException
 from pint import UnitRegistry
-from holodeck import HolodeckException
 
 
 class UnitConverter:
