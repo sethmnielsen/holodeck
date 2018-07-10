@@ -4,25 +4,31 @@ from pint import UnitRegistry
 
 
 class UnitConverter:
-    def __init__(self, source_units, target_units):
-        self._source_units = source_units if source_units is not None else WorldUnits()
-        self._target_units = target_units if target_units is not None else WorldUnits()
+    def __init__(self, native_units, foreign_units):
+        self._native_units = native_units if native_units is not None else WorldUnits()
+        self._foreign_units = foreign_units if foreign_units is not None else WorldUnits()
 
     @staticmethod
     def _convert_units(length, source, target):
         return length * target / source
 
-    def to_target_length(self, length):
-        return self.convert_units(length, self._source_units.get_length_units(), self._target_units.get_length_units())
+    def to_foreign_length(self, length):
+        return self._convert_units(length, self._native_units.get_length_units(), self._foreign_units.get_length_units())
 
-    def to_source_length(self, length):
-        return self.convert_units(length, self._target_units.get_length_units(), self._source_units.get_length_units())
+    def to_native_length(self, length):
+        return self._convert_units(length, self._foreign_units.get_length_units(), self._native_units.get_length_units())
 
-    def to_target_weight(self, weight):
-        return self.convert_units(weight, self._source_units.get_weight_units(), self._target_units.get_weight_units())
+    def to_foreign_weight(self, weight):
+        return self._convert_units(weight, self._native_units.get_weight_units(), self._foreign_units.get_weight_units())
 
-    def to_source_weight(self, weight):
-        return self.convert_units(weight, self._target_units.get_weight_units(), self._source_units.get_weight_units())
+    def to_native_weight(self, weight):
+        return self._convert_units(weight, self._foreign_units.get_weight_units(), self._native_units.get_weight_units())
+
+    def to_native_coordinate_frame(self, coordinate):
+        return self._convert_coordinate(coordinate, self._foreign_units, self._native_units)
+
+    def to_foreign_coordinate_frame(self, coordinate):
+        return self._convert_coordinate(coordinate, self._native_units, self._foreign_units)
 
     @staticmethod
     def _convert_coordinate(coordinate, source, target):
@@ -33,11 +39,11 @@ class UnitConverter:
         else:
             raise HolodeckException("You must pass a list of 3 elements to successfully convert the coordinates")
 
-    def set_source_units(self, source_units):
-        self._source_units = source_units
+    def set_native_units(self, native_units):
+        self._native_units = native_units
 
-    def set_target_units(self, target_units):
-        self._target_units = target_units
+    def set_foreign_units(self, foreign_units):
+        self._foreign_units = foreign_units
 
 
 class WorldUnits:
@@ -75,3 +81,10 @@ class WorldUnits:
 class CoordinateFrames(enum.Enum):
     left_handed = 1
     right_handed = 2
+
+
+class UnitType(enum.Enum):
+    length = 1
+    weight = 2
+    force = 3
+    time = 4

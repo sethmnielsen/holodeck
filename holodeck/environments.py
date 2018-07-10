@@ -56,6 +56,8 @@ class AgentDefinition(object):
 class HolodeckEnvironment(object):
     """The high level interface for interacting with a Holodeck world"""
 
+    _unit_converter = None  # Units should be consistent across the backend and frontend, so this is a static variable
+
     def __init__(self, agent_definitions, binary_path=None, task_key=None, height=512, width=512,
                  start_world=True, uuid="", gl_version=4):
         """Constructor for HolodeckEnvironment.
@@ -72,8 +74,8 @@ class HolodeckEnvironment(object):
         uuid -- A unique identifier, used when running multiple instances of holodeck (default "")
         gl_version -- The version of OpenGL to use for Linux (default 4)
         """
-        self._height = height  # TODO this is one instance where we should use units.
-        self._width = width  # TODO this is one instance where we should use units.
+        self._height = height  # TODO this is one instance where we should use units?
+        self._width = width  # TODO this is one instance where we should use units?
         self._uuid = uuid
 
         Sensors.set_primary_cam_size(height, width)  # TODO this is one instance where we should use units?
@@ -111,18 +113,25 @@ class HolodeckEnvironment(object):
         self._should_write_to_command_buffer = False
 
         # Setup the unit conversion
-        frontend_units = WorldUnits()
-        backend_units = WorldUnits()
-        backend_units.set_coordinate_frame(CoordinateFrames.left_handed)
-        self._unit_converter = UnitConverter(frontend_units, backend_units)
+        if HolodeckEnvironment._unit_converter is None:
+            frontend_units = WorldUnits()
+            backend_units = WorldUnits()
+            backend_units.set_coordinate_frame(CoordinateFrames.left_handed)
+            HolodeckEnvironment._unit_converter = UnitConverter(frontend_units, backend_units)
 
         self._client.acquire()
 
+    @staticmethod
     def set_frontend_units(self, unit_mapper):
-        self._unit_converter.set_source_units(unit_mapper)
+        HolodeckEnvironment._unit_converter.set_source_units(unit_mapper)
 
+    @staticmethod
     def _set_backend_units(self, unit_mapper):
-        self._unit_converter.set_target_units(unit_mapper)
+        HolodeckEnvironment._unit_converter.set_target_units(unit_mapper)
+
+    @staticmethod
+    def get_unit_converter():
+        return HolodeckEnvironment._unit_converter
 
     @property
     def action_space(self):
@@ -173,10 +182,6 @@ class HolodeckEnvironment(object):
         Positional arguments:
         action -- An action for the main agent to carry out on the next tick
         """
-        #todo: figure out how to implement this loop properly. 
-        for item in action:
-
-
         self._agent.act(action)
 
         self._handle_command_buffer()

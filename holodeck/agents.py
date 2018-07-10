@@ -1,5 +1,7 @@
 import numpy as np
 
+from holodeck.environments import HolodeckEnvironment
+
 
 class HolodeckAgent(object):
     def __init__(self, client, name="DefaultAgent"):
@@ -12,10 +14,10 @@ class HolodeckAgent(object):
         self.__act__(action)
 
     def teleport(self, location):
-        # TODO(Mitch) : make sure to convert the location of the teleport at some point.
         # The default teleport function is to copy the data to the buffer and set the bool to true
         # It can be overridden if needs be.
-        np.copyto(self._teleport_buffer, location) # TODO (mitch) this is one instance of np.copyto where we should use units.
+        np.copyto(self._teleport_buffer, HolodeckEnvironment.get_unit_converter().to_foreign_coordinate_frame([
+                      HolodeckEnvironment.get_unit_converter().to_foreign_length(item) for item in location]))
         np.copyto(self._teleport_bool_buffer, True)
 
     @property
@@ -28,7 +30,7 @@ class HolodeckAgent(object):
     def __act__(self, action):
         # The default act function is to copy the data,
         # but if needed it can be overridden
-        np.copyto(self._action_buffer, action) # TODO (mitch) this is one instance of np.copyto where we should use units.
+        np.copyto(self._action_buffer, action)
 
     def __repr__(self):
         return "HolodeckAgent"
@@ -46,6 +48,9 @@ class UAVAgent(HolodeckAgent):
 
     def __repr__(self):
         return "UAVAgent"
+
+    def __act__(self, action):
+        np.copyto(self._action_bufer, HolodeckEnvironment.get_unit_converter().to_foreign_coordinate_frame(action))
 
 
 class ContinuousSphereAgent(HolodeckAgent):
@@ -76,7 +81,7 @@ class DiscreteSphereAgent(HolodeckAgent):
         actions = np.array([[2, 0], [-2, 0], [0, 2], [0, -2]])
         to_act = np.array(actions[action, :])
 
-        np.copyto(self._action_buffer, to_act) # TODO this is one instance of np.copyto where we should use units.
+        np.copyto(self._action_buffer, to_act)
 
     def __repr__(self):
         return "DiscreteSphereAgent"
@@ -166,6 +171,11 @@ class NavAgent(HolodeckAgent):
         # TODO(joshgreaves) : Remove dependency on gym
         # return spaces.Box(-10000, 10000, shape=[3])
         pass
+
+    def __act__(self, action):
+        np.copyto(self._action_bufer, [HolodeckEnvironment.get_unit_converter().to_foreign_length(x) for x in action])
+
+
 
     def __action_space_shape__(self):
         return [3]
