@@ -74,6 +74,7 @@ class HolodeckEnvironment(object):
         self._height = height
         self._width = width
         self._uuid = uuid
+        self._coordinate_frame = None
 
         Sensors.set_primary_cam_size(height, width)
 
@@ -110,6 +111,9 @@ class HolodeckEnvironment(object):
         self._should_write_to_command_buffer = False
 
         self._client.acquire()
+
+    def set_coordinate_frame(self, frame):
+        self._coordinate_frame = frame
 
     @property
     def action_space(self):
@@ -171,9 +175,11 @@ class HolodeckEnvironment(object):
 
     def teleport(self, agent_name, location):
         """Loads up a command to teleport the target agent to any given location.
-        The teleport will occur the next time a step is taken. If no rotation is given, rotation will be set to the
-        default value: 0,0,0.
+        The teleport will occur the next time a step is taken. Rotation will be set to the
+        default value: 0,0,0 (straight north, X&Y level with horizon).
         """
+        if self._coordinate_frame is not None:
+            self._coordinate_frame.convert_coordinate(location)
         self._agent_dict[agent_name].teleport(location)
 
     def _handle_command_buffer(self):
@@ -191,6 +197,8 @@ class HolodeckEnvironment(object):
         agent_name -- The name of the agent to give the command to
         action -- The action for the agent specified to carry out on the next tick
         """
+        if self._coordinate_frame is not None:
+
         self._agent_dict[agent_name].act(action)
 
     def tick(self):

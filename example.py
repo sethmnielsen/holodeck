@@ -5,11 +5,16 @@ import holodeck
 from holodeck import agents
 from holodeck.environments import *
 from holodeck.sensors import Sensors
+from holodeck.coordinateframe import CoordinateFrame
 
 
 def uav_example():
     """A basic example of how to use the UAV agent."""
     env = holodeck.make("UrbanCity")
+    # This is an example of setting the coordinate frame to be right handed. Default is left handed.
+    coordinate_frame = CoordinateFrame()
+    coordinate_frame.set_right_handed()
+    env.set_coordinate_frame(coordinate_frame)
 
     for i in range(10):
         env.reset()
