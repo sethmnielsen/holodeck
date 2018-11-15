@@ -27,11 +27,13 @@ class AgentDefinition(object):
                       "UavAgent": UavAgent,
                       "AndroidAgent": AndroidAgent,
                       "NavAgent": NavAgent,
+                      "BoatAgent": BoatAgent,
                       DiscreteSphereAgent: DiscreteSphereAgent,
                       ContinuousSphereAgent: ContinuousSphereAgent,
                       UavAgent: UavAgent,
                       AndroidAgent: AndroidAgent,
-                      NavAgent: NavAgent}
+                      NavAgent: NavAgent,
+                      BoatAgent: BoatAgent}
 
     @staticmethod
     def __convert_sensors(sensors):
@@ -352,6 +354,14 @@ class HolodeckEnvironment(object):
 
         self._should_write_to_command_buffer = True
         command_to_send = SetWeatherCommand(weather_type.lower())
+        self._commands.add_command(command_to_send)
+
+    def set_ocean_state(self, wave_intensity, wave_size, wave_direction):
+        """Queue up a teleport camera command to stop the day cycle.
+                By the next tick, the camera's location and rotation will be updated
+                """
+        self._should_write_to_command_buffer = True
+        command_to_send = SetOceanStateCommand(wave_intensity, wave_size, wave_direction)
         self._commands.add_command(command_to_send)
 
     def set_control_scheme(self, agent_name, control_scheme):

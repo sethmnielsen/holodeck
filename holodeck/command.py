@@ -269,3 +269,37 @@ class TeleportCameraCommand(Command):
         rotation: A three dimensional array representing rotation in x,y,z
         """
         self.add_number_parameters(rotation)
+
+
+class SetOceanStateCommand(Command):
+    def __init__(self, wave_intensity, wave_size, wave_direction):
+        """Sets the command type to TeleportCamera and initialized this object.
+        :param location: The location to give the camera
+        :param rotation: The rotation to give the camera
+        """
+        Command.__init__(self)
+        self._command_type = "SetOceanState"
+        self.set_wave_intensity(wave_intensity)
+        self.set_wave_size(wave_size)
+        self.set_wave_direction(wave_direction)
+
+    def set_wave_intensity(self, wave_intensity):
+        """Set the location.
+        Positional Arguments:
+        location: A three dimensional array representing location in x,y,z
+        """
+        self.add_number_parameters(wave_intensity)
+
+    def set_wave_size(self, wave_size):
+        """Set the rotation.
+        Positional Arguments:
+        rotation: A three dimensional array representing rotation in x,y,z
+        """
+        self.add_number_parameters(wave_size)
+
+    def set_wave_direction(self, wave_direction):
+        """Set the rotation.
+        Positional Arguments:
+        rotation: A three dimensional array representing rotation in x,y,z
+        """
+        self.add_number_parameters(wave_direction)

@@ -5,6 +5,7 @@ import holodeck
 from holodeck import agents
 from holodeck.environments import *
 from holodeck.sensors import Sensors
+import cv2
 
 
 def uav_example():
@@ -147,16 +148,43 @@ def editor_example():
     """This editor example shows how to interact with holodeck worlds while they are being built
     in the Unreal Engine. Most people that use holodeck will not need this.
     """
-    sensors = [Sensors.PIXEL_CAMERA, Sensors.LOCATION_SENSOR, Sensors.VELOCITY_SENSOR]
-    agent = AgentDefinition("uav0", agents.UavAgent, sensors)
-    env = HolodeckEnvironment(agent, start_world=False)
-    env.agents["uav0"].set_control_scheme(1)
-    command = [0, 0, 10, 50]
+    sensors = [Sensors.LOCATION_SENSOR, Sensors.KEY_POINTS_SENSOR]
+    boat = AgentDefinition("boat0", agents.BoatAgent, sensors)
+
+    agent_definitions = [
+        AgentDefinition("uav0", agents.UavAgent, [Sensors.PIXEL_CAMERA, Sensors.LOCATION_SENSOR]),
+        boat
+    ]
+
+    env = HolodeckEnvironment(agent_definitions, start_world=False)
+    # env.agents["boat0"].set_control_scheme(1)
+    command = np.array([20])
+    _ = env.step(command)
+    env.set_day_time(8)
+
+    wave_intensity, wave_size, wave_direction = 13, 1, 0
+
+    # env.teleport()
 
     for i in range(10):
         env.reset()
-        for _ in range(1000):
-            state, reward, terminal, _ = env.step(command)
+        # env.set_weather("rain")
+        env.set_ocean_state(13, 1, 0)
+        env.act("uav0", [0, 0, 0, 0])
+        env.act("boat0", [20])
+        states = env.tick()
+
+        # cv2.namedWindow("Image")
+        # cv2.moveWindow("Image", 500, 500)
+        # cv2.imshow("Image", states["uav0"][Sensors.PIXEL_CAMERA][:, :, 0:3])
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+
+        # env.set_day_time(0)
+
+        for _ in range(10000):
+            states = env.tick()
+            print(states["boat0"][Sensors.LOCATION_SENSOR][0])
 
 
 def editor_multi_agent_example():
@@ -184,9 +212,8 @@ def editor_multi_agent_example():
 
 
 if __name__ == "__main__":
+    # if 'DefaultWorlds' not in holodeck.installed_packages():
+    #     holodeck.install("DefaultWorlds")
+    #     print(holodeck.package_info("DefaultWorlds"))
 
-    if 'DefaultWorlds' not in holodeck.installed_packages():
-        holodeck.install("DefaultWorlds")
-        print(holodeck.package_info("DefaultWorlds"))
-
-    uav_example()
+    editor_example()

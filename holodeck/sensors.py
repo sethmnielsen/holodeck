@@ -19,6 +19,7 @@ class Sensors:
         ROTATION_SENSOR (int): Index for rotation sensor. Value is 11.
         COLLISION_SENSOR (int): Index for collision sensor. Value is 12.
         PRESSURE_SENSOR (int): Index for pressure sensor. Value is 13.
+        KEY_POINTS_SENSOR (int): Index for key points sensor. Value is 14.
     """
     TERMINAL = 1
     REWARD = 2
@@ -33,6 +34,7 @@ class Sensors:
     ROTATION_SENSOR = 11
     COLLISION_SENSOR = 12
     PRESSURE_SENSOR = 13
+    KEY_POINTS_SENSOR = 14
 
     # Sizes are the number of entries in the numpy array
     _shape_dict = {
@@ -49,6 +51,7 @@ class Sensors:
         ROTATION_SENSOR: [3],
         COLLISION_SENSOR: [1],
         PRESSURE_SENSOR: [48*(3+1)],
+        KEY_POINTS_SENSOR: [8, 3]    # TODO: make generalizable to more than just boat agent
     }
 
     _type_dict = {
@@ -65,6 +68,7 @@ class Sensors:
         ROTATION_SENSOR: np.float32,
         COLLISION_SENSOR: np.bool,
         PRESSURE_SENSOR: np.float32,
+        KEY_POINTS_SENSOR: np.float32
     }
 
     _name_dict = {
@@ -80,7 +84,8 @@ class Sensors:
         VELOCITY_SENSOR: "VelocitySensor",
         ROTATION_SENSOR: "RotationSensor",
         COLLISION_SENSOR: "CollisionSensor",
-        PRESSURE_SENSOR: "PressureSensor"
+        PRESSURE_SENSOR: "PressureSensor",
+        KEY_POINTS_SENSOR: "KeyPointsSensor"
     }
 
     _reverse_name_dict = {v: k for k, v in _name_dict.items()}
