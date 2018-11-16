@@ -5,7 +5,7 @@ import holodeck
 from holodeck import agents
 from holodeck.environments import *
 from holodeck.sensors import Sensors
-
+# import cv2
 
 def multi_agent_example():
     """A basic example of using multiple agents"""
@@ -13,18 +13,27 @@ def multi_agent_example():
 
     cmd0 = np.array([0, 0, -2, 10])
     cmd1 = 10
+
     for i in range(10):
         env.reset()
+        env.set_ocean_state(2, 5, 90)
 
         env.act("uav0", cmd0)
         env.act("boat0", cmd1)
-        env.set_ocean_state(1, 1, 1)
-
-        env.set_ocean_state(1, 1, 0)
-        # env.set_day_time(0)
 
         for _ in range(1000):
             states = env.tick()
+            
+            key_points = states["boat0"][Sensors.KEY_POINTS_SENSOR]
+            
+            pixels = states["uav0"][Sensors.PIXEL_CAMERA]
+
+            # cv2.namedWindow("Image")
+            # cv2.moveWindow("Image",500,500)
+            # cv2.imshow("Image", pixels[:, :, 0:3])
+            # cv2.waitKey(0)
+            # cv2.destroyAllWindows()
+
 
 
 def world_command_examples():
@@ -95,7 +104,6 @@ def editor_example():
     print("hello")
     for i in range(10):
         env.reset()
-        # env.set_weather("rain")
         env.set_ocean_state(13, 1, 0)
         env.act("uav0", [0, 0, 0, 0])
         env.act("boat0", 20)
@@ -107,7 +115,4 @@ def editor_example():
 
 
 if __name__ == "__main__":
-    # if 'DefaultWorlds' not in holodeck.installed_packages():
-    #     holodeck.install("DefaultWorlds")
-    #     print(holodeck.package_info("DefaultWorlds"))
     multi_agent_example()

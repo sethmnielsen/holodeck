@@ -286,11 +286,11 @@ class SetOceanStateCommand(Command):
 
     @staticmethod
     def is_valid_wave_intensity(intensity):
-        return isinstance(intensity, int) and 1 >= intensity <= 13
+        return isinstance(intensity, int) and 1 <= intensity <= 13
 
     @staticmethod
     def is_valid_wave_size(size):
-        return isinstance(size, int) and 1 >= size <= 8
+        return isinstance(size, int) and 1 <= size <= 8
 
     def set_wave_intensity(self, wave_intensity):
         """Set the wave intensity.
