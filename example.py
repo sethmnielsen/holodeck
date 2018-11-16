@@ -6,6 +6,7 @@ from holodeck import agents
 from holodeck.environments import *
 from holodeck.sensors import Sensors
 
+
 def multi_agent_example():
     """A basic example of using multiple agents"""
     env = holodeck.make("Ocean")
@@ -17,6 +18,7 @@ def multi_agent_example():
 
         env.act("uav0", cmd0)
         env.act("boat0", cmd1)
+        env.set_ocean_state(1, 1, 1)
 
         env.set_ocean_state(1, 1, 0)
         # env.set_day_time(0)

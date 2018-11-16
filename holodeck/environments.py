@@ -357,9 +357,20 @@ class HolodeckEnvironment(object):
         self._commands.add_command(command_to_send)
 
     def set_ocean_state(self, wave_intensity, wave_size, wave_direction):
-        """Queue up a teleport camera command to stop the day cycle.
-                By the next tick, the camera's location and rotation will be updated
-                """
+        """Queue up a set ocean state to stop the change the ocean.
+        By the next tick, the oceans wind speed, wave size, and wave direction will be updated
+
+        Args:
+            wave_intensity (int): An integer between 1 and 13 that represents the wave intensity
+            wave_size (int): An integer between 1 and 8 that represents the wave size
+            wave_direction (float): The direction of the wind represented in degrees
+        """
+
+        if not SetOceanStateCommand.is_valid_wave_intensity(wave_intensity):
+            raise HolodeckException("Invalid wave intensity value: " + str(wave_intensity))
+        if not SetOceanStateCommand.is_valid_wave_size(wave_size):
+            raise HolodeckException("Invalid wave size value: " + str(wave_size))
+
         self._should_write_to_command_buffer = True
         command_to_send = SetOceanStateCommand(wave_intensity, wave_size, wave_direction)
         self._commands.add_command(command_to_send)
