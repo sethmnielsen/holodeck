@@ -50,12 +50,20 @@ class HolodeckAgent(object):
                                                   self.control_schemes))
 
         self._action_buffer = self._client.malloc(name, [self._max_control_scheme_length], np.float32)
+        self._control_scheme_buffer = self._client.malloc(name + "_control_scheme", [1],
+                                                          np.uint8)
+
         # Teleport flag: 0: do nothing, 1: teleport, 2: rotate, 3: teleport and rotate
         self._teleport_bool_buffer = self._client.malloc(name + "_teleport_flag", [1], np.uint8)
         self._teleport_buffer = self._client.malloc(name + "_teleport_command", [3], np.float32)
         self._rotation_buffer = self._client.malloc(name + "_rotation_command", [3], np.float32)
-        self._control_scheme_buffer = self._client.malloc(name + "_control_scheme", [1],
-                                                          np.uint8)
+        
+        # Set velocity flag: 0: do nothing, 1: set linear velocity, 2: set angular velocity, 3: set both
+        self._set_velocity_bool_buffer = self._client.malloc(name + "_set_velocity_flag", [1], np.uint8)
+        self._linear_vel_buffer = self._client.malloc(name + "_linear_vel_command", [3], np.float32)
+        self._angular_vel_buffer = self._client.malloc(name + "_angular_vel_command", [3], np.float32)
+
+
         self._current_control_scheme = 0
         self.set_control_scheme(0)
 
@@ -96,6 +104,28 @@ class HolodeckAgent(object):
             np.copyto(self._rotation_buffer, rotation)
             val += 2
         self._teleport_bool_buffer[0] = val
+
+    def set_velocity(self, linear_velocity=None, angular_velocity=None):
+        """ Sets the linear and angular velocity
+
+        Args:
+            linear_velocity (np.ndarray, optional): An array with three elements specifying the target linear velocity
+            If None, keeps the current location. Defaults to None.
+            angular_velocity (np.ndarray, optional): An array with three elements specifying the target angular velocity
+            If None, keeps the current location. Defaults to None.
+
+        Returns:
+            None
+        """
+        val = 0
+        if linear_velocity is not None:
+            val += 1
+            np.copyto(self._linear_vel_buffer, linear_velocity)
+        if angular_velocity is not None:
+            np.copyto(self._angular_vel_buffer, angular_velocity)
+            val += 2
+        self._set_velocity_bool_buffer[0] = val
+
 
     @property
     def action_space(self):
