@@ -5,42 +5,44 @@ import holodeck
 from holodeck import agents
 from holodeck.environments import *
 from holodeck.sensors import Sensors
-# import cv2
 
 def multi_agent_example():
     """A basic example of using multiple agents"""
     env = holodeck.make("Ocean")
 
-    cmd0 = np.array([0, 0, -2, 10])
-    cmd1 = 10
+    uav_cmd = np.array([0, 0, -2, 10])
+    boat_cmd = 10
 
     for i in range(10):
         env.reset()
+
+        # wave intensity: 1-13(int), wave size: 1-8(int), wave direction: 0-360 degreese (float)
         env.set_ocean_state(2, 5, 90)
 
-        env.act("uav0", cmd0)
-        env.act("boat0", cmd1)
+        # env.teleport("boat0", np.array([0, 0, 0]), [0, 0, 0]) *bug*
+        
+        # env.set_weather("cloudy")
+        
+        # env.set_day_time(6)
 
-        for _ in range(1000):
+        env.act("uav0", uav_cmd)
+        env.act("boat0", boat_cmd)
+
+        for _ in range(100):
             states = env.tick()
-            
+
             key_points = states["boat0"][Sensors.KEY_POINTS_SENSOR]
+            print(key_points[BoatAgent.Bow])
             
             pixels = states["uav0"][Sensors.PIXEL_CAMERA]
-
-            # cv2.namedWindow("Image")
-            # cv2.moveWindow("Image",500,500)
-            # cv2.imshow("Image", pixels[:, :, 0:3])
-            # cv2.waitKey(0)
-            # cv2.destroyAllWindows()
 
 
 
 def world_command_examples():
     """A few examples to showcase commands for manipulating the worlds."""
-    env = holodeck.make("MazeWorld")
+    env = holodeck.make("Ocean")
 
-    # This is the unaltered MazeWorld
+    # This is the unaltered world
     for _ in range(300):
         _ = env.tick()
     env.reset()

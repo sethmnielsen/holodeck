@@ -262,7 +262,8 @@ class NavAgent(HolodeckAgent):
 
 
 class BoatAgent(HolodeckAgent):
-    """BOOOOOOOOOOOOOOOOOOOOOOOAT"""
+    """A simple boat agent that moves along the ocean surface with a single forward force
+    Inherits from :obj:`HolodeckAgent`."""
 
     Bow = 0
     PortSide = 1
@@ -282,3 +283,4 @@ class BoatAgent(HolodeckAgent):
 
     def __act__(self, action):
         np.copyto(self._action_buffer, np.array(action))
+
