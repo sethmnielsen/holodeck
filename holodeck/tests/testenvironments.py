@@ -20,6 +20,89 @@ import cv2
 """
 
 
+def set_ticks_per_capture_test():
+    """This test should output 'Pixels changed in 5 ticks' each iteration
+    """
+    sensors = [Sensors.RGB_CAMERA, Sensors.LOCATION_SENSOR, Sensors.VELOCITY_SENSOR]
+    agent = AgentDefinition("uav0", agents.UavAgent, sensors)
+    env = HolodeckEnvironment(agent, start_world=False)
+    env.agents["uav0"].set_control_scheme(1)
+    env.set_ticks_per_capture("uav0", 5)
+    command = [0, 0, 10, 50]
+
+    for i in range(10):
+        print("Iteration " + str(i))
+        env.reset()
+        last_pixels = []
+        last_tick = -1
+        for tick in range(100):
+
+            state, _, _, _ = env.step(command)
+
+            pixels = state[Sensors.RGB_CAMERA]
+
+            if len(last_pixels) == 0 or not np.array_equal(pixels, last_pixels):
+                print("Pixels changed in " + str(tick - last_tick) + " ticks")
+                last_pixels = np.copy(pixels)
+                last_tick = tick
+
+
+def set_sensor_enabled_test():
+    """This test should output 'Pixels changed in 1 ticks' 5 times followed by 'Pixels changed in 5 ticks'
+    """
+    sensors = [Sensors.RGB_CAMERA, Sensors.LOCATION_SENSOR, Sensors.VELOCITY_SENSOR]
+    agent = AgentDefinition("uav0", agents.UavAgent, sensors)
+    env = HolodeckEnvironment(agent, start_world=False)
+    env.agents["uav0"].set_control_scheme(1)
+    command = [0, 0, 10, 50]
+
+    for i in range(10):
+        print("Iteration " + str(i))
+        env.reset()
+        last_pixels = []
+        last_tick = -1
+        for tick in range(100):
+            if tick % 5 == 0:
+                enabled = tick % 2 == 0
+                env.set_sensor_enabled("uav0", Sensors.name(Sensors.RGB_CAMERA), enabled)
+
+            state, _, _, _ = env.step(command)
+
+            pixels = state[Sensors.RGB_CAMERA]
+
+            if len(last_pixels) == 0 or not np.array_equal(pixels, last_pixels):
+                print("Pixels changed in " + str(tick - last_tick) + " ticks")
+                last_pixels = np.copy(pixels)
+                last_tick = tick
+
+
+def copy_state_test():
+    """This test should output 'Pixels changed in 1 ticks' each tick every other iteration
+    """
+    sensors = [Sensors.RGB_CAMERA, Sensors.LOCATION_SENSOR, Sensors.VELOCITY_SENSOR]
+    agent = AgentDefinition("uav0", agents.UavAgent, sensors)
+    env = HolodeckEnvironment(agent, start_world=False, copy_state=True)
+    env.agents["uav0"].set_control_scheme(1)
+    command = [0, 0, 10, 50]
+
+    for i in range(10):
+        if i % 2 == 1:
+            env._copy_state = not env._copy_state
+        print("Iteration " + str(i))
+        env.reset()
+        last_pixels = []
+        last_tick = -1
+        for tick in range(20):
+            state, _, _, _ = env.step(command)
+
+            pixels = state[Sensors.RGB_CAMERA]
+
+            if len(last_pixels) == 0 or not np.array_equal(pixels, last_pixels):
+                print("Pixels changed in " + str(tick - last_tick) + " ticks")
+                last_pixels = pixels
+                last_tick = tick
+
+
 # test that pixel camera works properly
 def camera_test(env, agent_name, command, test_time):
 
@@ -31,7 +114,7 @@ def camera_test(env, agent_name, command, test_time):
             state, _, _, _ = env.step(command)
 
             # To access specific sensor data:
-            pixels = state[Sensors.PIXEL_CAMERA]
+            pixels = state[Sensors.RGB_CAMERA]
             if j < 2:
                 cv2.namedWindow("Image")
                 cv2.moveWindow("Image",500,500)
@@ -113,6 +196,9 @@ def world_command_test(env, agent_name, command, test_time):
         _ = env.tick()
     env.reset()
 
+    print("Testing set_sensor_enabled")
+
+
 
 def test_default_worlds():
 
@@ -152,5 +238,4 @@ def test_default_worlds():
 
 
 if __name__ == "__main__":
-
-    test_default_worlds()
+    set_sensor_enabled_test()
