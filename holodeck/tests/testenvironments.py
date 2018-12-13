@@ -196,9 +196,6 @@ def world_command_test(env, agent_name, command, test_time):
         _ = env.tick()
     env.reset()
 
-    print("Testing set_sensor_enabled")
-
-
 
 def test_default_worlds():
 
@@ -238,4 +235,5 @@ def test_default_worlds():
 
 
 if __name__ == "__main__":
-    set_sensor_enabled_test()
+
+    test_default_worlds()
