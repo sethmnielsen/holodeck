@@ -94,10 +94,13 @@ def install(package_name):
     """
     holodeck_path = util.get_holodeck_path()
     binary_website = "https://s3.amazonaws.com/holodeckworlds/"
-
+    
     if package_name not in packages:
-        raise HolodeckException("Unknown package name " + package_name)
-    package_url = packages[package_name]
+        package_url = package_name
+        split = package_name.split("_")
+        package_name = split[0]
+    else:
+        package_url = packages[package_name]
 
     print("Installing " + package_name + " at " + holodeck_path)
     install_path = os.path.join(holodeck_path, "worlds")
