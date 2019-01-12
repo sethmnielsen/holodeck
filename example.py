@@ -25,6 +25,8 @@ def multi_agent_example():
         
         # env.set_day_time(6)
 
+        # env.set_aruco_code(False) # This removes the aruco code from the back of the ship
+
         env.act("uav0", uav_cmd)
         env.act("boat0", boat_cmd)
 
