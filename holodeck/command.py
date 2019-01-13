@@ -312,3 +312,20 @@ class SetOceanStateCommand(Command):
         wave_direction: A float representing the direction of the waves
         """
         self.add_number_parameters(wave_direction)
+
+
+class SetArucoCodeCommand(Command):
+    def __init__(self, set):
+        """Sets the command type to SetArucoCode and initialized this object.
+        :param set: a boolean representing whether to set or unset the aruco code
+        """
+        Command.__init__(self)
+        self._command_type = "SetArucoCode"
+        self.set_to_set(set)
+
+    def set_to_set(self, set):
+        """
+        Positional Arguments:
+        location: a boolean representing whether to set or unset the aruco code
+        """
+        self.add_number_parameters(int(set))

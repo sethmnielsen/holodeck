@@ -89,32 +89,27 @@ def editor_example():
     """This editor example shows how to interact with holodeck worlds while they are being built
     in the Unreal Engine. Most people that use holodeck will not need this.
     """
-    sensors = [Sensors.LOCATION_SENSOR, Sensors.KEY_POINTS_SENSOR]
-    boat = AgentDefinition("boat0", agents.BoatAgent, sensors)
-
     agent_definitions = [
         AgentDefinition("uav0", agents.UavAgent, [Sensors.PIXEL_CAMERA, Sensors.LOCATION_SENSOR]),
-        boat
+        AgentDefinition("boat0", agents.BoatAgent, [Sensors.LOCATION_SENSOR, Sensors.KEY_POINTS_SENSOR])
     ]
 
     env = HolodeckEnvironment(agent_definitions, start_world=False)
-    command = np.array([20])
-    _ = env.step(command)
-    env.set_day_time(8)
 
     wave_intensity, wave_size, wave_direction = 13, 1, 0
     print("hello")
     for i in range(10):
         env.reset()
-        env.set_ocean_state(13, 1, 0)
+        env.set_ocean_state(6, 4, 0)
         env.act("uav0", [0, 0, 0, 0])
         env.act("boat0", 20)
-        states = env.tick()
+        _ = env.tick()
+        env.teleport("boat0", np.array([0, 0, 0]), [0, 0, 0])
 
-        for _ in range(10000):
+        for _ in range(5000):
             states = env.tick()
             print(states["boat0"][Sensors.LOCATION_SENSOR][0])
 
 
 if __name__ == "__main__":
-    multi_agent_example()
+    editor_example()

@@ -118,8 +118,9 @@ class HolodeckEnvironment(object):
         # Set the default state function
         self.num_agents = len(self._all_agents)
         self._default_state_fn = self._get_single_state if self.num_agents == 1 else self._get_full_state
+        self._default_state_fn_reset = self._get_single_state_reset if self.num_agents == 1 else self._get_full_state
 
-        # Subscribe settings
+        # Subscribe settingsenv
         self._reset_ptr = self._client.malloc("RESET", [1], np.bool)
         self._reset_ptr[0] = False
         self._command_bool_ptr = self._client.malloc("command_bool", [1], np.bool)
@@ -178,7 +179,7 @@ class HolodeckEnvironment(object):
         for _ in range(self._pre_start_steps + 1):
             self.tick()
 
-        return self._default_state_fn()
+        return self._default_state_fn_reset()
 
     def step(self, action):
         """Supplies an action to the main agent and tells the environment to tick once.
@@ -194,6 +195,7 @@ class HolodeckEnvironment(object):
             Terminal is the bool terminal signal returned by the environment.
             Info is any additional info, depending on the world. Defaults to None.
         """
+
         self._agent.act(action)
 
         self._handle_command_buffer()
@@ -375,6 +377,16 @@ class HolodeckEnvironment(object):
         command_to_send = SetOceanStateCommand(wave_intensity, wave_size, wave_direction)
         self._commands.add_command(command_to_send)
 
+    def set_aruco_code(self, set):
+        """Queue up a set aruco code command to change whether the aruco code is displayed or not
+
+        Args:
+            set (bool): Wether to set or unset the aruco code
+        """
+        self._should_write_to_command_buffer = True
+        command_to_send = SetArucoCodeCommand(set)
+        self._commands.add_command(command_to_send)
+
     def set_control_scheme(self, agent_name, control_scheme):
         """Set the control scheme for a specific agent.
 
@@ -437,6 +449,18 @@ class HolodeckEnvironment(object):
                 terminal = self._sensor_map[self._agent.name][sensor][0]
 
         return copy(self._sensor_map[self._agent.name]), reward, terminal, None
+
+    #copying the function to change it to return to match gym interface
+    def _get_single_state_reset(self):
+        reward = None
+        terminal = None
+        for sensor in self._sensor_map[self._agent.name]:
+            if sensor == Sensors.REWARD:
+                reward = self._sensor_map[self._agent.name][sensor][0]
+            elif sensor == Sensors.TERMINAL:
+                terminal = self._sensor_map[self._agent.name][sensor][0] #do I need to comment these out too
+
+        return copy(self._sensor_map[self._agent.name])#, reward, terminal, None
 
     def _get_full_state(self):
         return copy(self._sensor_map)
