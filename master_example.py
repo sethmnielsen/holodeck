@@ -20,23 +20,27 @@ def uav_example():
     for _ in range(100):
         state, reward, terminal, _ = env.step(command)
 
-        # print(state[9])
 
         # To access specific sensor data:
         pixels = state[Sensors.PIXEL_CAMERA]
         velocity = state[Sensors.VELOCITY_SENSOR]
         # For a full list of sensors the UAV has, view the README
 
-    print("Switching")
+    # print("Switching")
     # env.set_control_scheme("uav0", ControlSchemes.UAV_TORQUES)
-    command = np.array([0, -0.2, 0, 2])
+    command = np.array([0, -0.2, 0, 1])
     while state[9][1] < 25:
         state, reward, terminal, _ = env.step(command)
-        # print(state[9])
 
-    # command = np.array([0, 0, 0, 2])
-    # for _ in range(100):
-        # state, reward, terminal, _ = env.step(command)
+    command = np.array([0, 0, -0.5, 1])
+    for i in range(210):
+        state, reward, terminal, _ = env.step(command)
+        # if i % 10 == 0:
+            # print(state)
+
+    command = np.array([0, -0.2, 0, 1])
+    while state[9][0] < 25:
+        state, reward, terminal, _ = env.step(command)
 
     # It is useful to know that you can control the AgentFollower camera(what you see) by pressing V to toggle spectator
     # mode. This detaches the camera and allows you to move freely about the world.
