@@ -113,7 +113,7 @@ class HolodeckAgent(object):
             val += 1
             np.copyto(self._teleport_buffer[0:3], location)
         if rotation is not None:
-            np.copyto(self._rotation_buffer[3:6], rotation)
+            np.copyto(self._teleport_buffer[3:6], rotation)
             val += 2
         self._teleport_type_buffer[0] = val
 
@@ -301,4 +301,4 @@ class NavAgent(HolodeckAgent):
         return "NavAgent " + self.name
 
     def __act__(self, action):
-        np.copyto(self._action_buffer, np.array(action) * 100)
+        np.copyto(self._action_buffer, action)
