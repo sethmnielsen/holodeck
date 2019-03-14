@@ -1,11 +1,12 @@
 """This file contains multiple examples of how you might use Holodeck."""
 import numpy as np
-
+import cv2
 import holodeck
 from holodeck import agents
 from holodeck.environments import *
 from holodeck.sensors import Sensors
 
+np.set_printoptions(suppress=True)
 
 def uav_example():
     """A basic example of how to use the UAV agent."""
@@ -15,37 +16,68 @@ def uav_example():
 
     # This changes the control scheme for the uav
     env.set_control_scheme("uav0", ControlSchemes.UAV_ROLL_PITCH_YAW_RATE_ALT)
+    env.set_day_time(14)
+    
+
+    # fourCC = cv2.VideoWriter_fourcc(*'MPEG')
+    # out = cv2.VideoWriter('recording.avi', fourCC, 30.0, (1280,720))
+
+    # Initialize recording arrays
+      
+    pos = np.array([])
+    vel = np.array([])
+    att = np.array([])  
+    init = False
 
     command = np.array([0, 0, 0, 2])
     for _ in range(100):
-        state, reward, terminal, _ = env.step(command)
+        state = run(env, command)
+        if not init:
+            init = True
+            pos = state[Sensors.LOCATION_SENSOR]
+            vel = state[Sensors.VELOCITY_SENSOR]
+            att = state[Sensors.ORIENTATION_SENSOR]
+        # else:
+            # # pos, vel, att = append_state(state, pos, vel, att)
 
-
-        # To access specific sensor data:
-        pixels = state[Sensors.PIXEL_CAMERA]
-        velocity = state[Sensors.VELOCITY_SENSOR]
-        # For a full list of sensors the UAV has, view the README
-
-    # print("Switching")
-    # env.set_control_scheme("uav0", ControlSchemes.UAV_TORQUES)
     command = np.array([0, -0.2, 0, 1])
     while state[9][1] < 25:
-        state, reward, terminal, _ = env.step(command)
-
+        state = run(env, command)
+        # # pos, vel, att = append_state(state, pos, vel, att)
+        
     command = np.array([0, 0, -0.5, 1])
     for i in range(210):
-        state, reward, terminal, _ = env.step(command)
-        # if i % 10 == 0:
-            # print(state)
+        state = run(env, command)
+        # # pos, vel, att = append_state(state, pos, vel, att)
 
     command = np.array([0, -0.2, 0, 1])
     while state[9][0] < 25:
-        state, reward, terminal, _ = env.step(command)
+        state = run(env, command)        
+        # # pos, vel, att = append_state(state, pos, vel, att)
 
+
+    print('Releasing')
+    # out.release()
     # It is useful to know that you can control the AgentFollower camera(what you see) by pressing V to toggle spectator
     # mode. This detaches the camera and allows you to move freely about the world.
     # You can also press C to snap to the location of the pixel camera to see the world from the perspective of the
     # agent. See the Controls section of the ReadMe for more details.
+
+def run(env, command):
+    state, reward, terminal, _ = env.step(command)
+    return state
+
+def append_state(state, pos, vel, att):
+    pos = np.vstack((pos, state[Sensors.LOCATION_SENSOR]))
+    vel = np.vstack((vel, state[Sensors.VELOCITY_SENSOR]))
+    att = np.vstack((att, state[Sensors.ORIENTATION_SENSOR]))
+
+def show_video(state):
+    frame = state[Sensors.PIXEL_CAMERA]
+    cv2.cvtColor(frame,cv2.COLOR_RGB2BGR)
+    cv2.imshow('window', frame) 
+    cv2.waitKey(10)
+    out.write(frame)
 
 
 def nav_example():
