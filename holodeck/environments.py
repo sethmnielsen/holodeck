@@ -268,6 +268,30 @@ class HolodeckEnvironment(object):
 
         self._enqueue_command(ChangeFogDensityCommand(density))
 
+    def set_ocean_state(self, wave_intensity, wave_size, wave_direction):
+        """Queue up a set ocean state to stop the change the ocean.
+        By the next tick, the oceans wind speed, wave size, and wave direction will be updated
+        Args:
+            wave_intensity (int): An integer between 1 and 13 that represents the wave intensity
+            wave_size (int): An integer between 1 and 8 that represents the wave size
+            wave_direction (float): The direction of the wind represented in degrees
+        """
+
+        if not SetOceanStateCommand.is_valid_wave_intensity(wave_intensity):
+            raise HolodeckException("Invalid wave intensity value: " + str(wave_intensity))
+        if not SetOceanStateCommand.is_valid_wave_size(wave_size):
+            raise HolodeckException("Invalid wave size value: " + str(wave_size))
+
+        self.send_world_command("SetOceanState", [wave_intensity, wave_size, wave_direction], string_params=[])
+
+    def set_aruco_code(self, set):
+        """Queue up a set aruco code command to change whether the aruco code is displayed or not
+        Args:
+            set (bool): Wether to set or unset the aruco code
+        """
+        self.send_world_command("SetArucoCode", [int(set)], string_params=[])
+
+
     def draw_line(self, start, end, color=None, thickness=10.0):
         """Draws a debug line in the world
 
@@ -431,9 +455,8 @@ class HolodeckEnvironment(object):
             num_params (list of int): The number parameters that correspond to the command. This may be empty.
             string_params (list of string): The string parameters that correspond to the command. This may be empty.
         """
-        self._should_write_to_command_buffer = True
         command_to_send = CustomCommand(name, num_params, string_params)
-        self._commands.add_command(command_to_send)
+        self._enqueue_command(command_to_send)
 
     def __linux_start_process__(self, binary_path, task_key, gl_version, verbose, show_viewport=True):
         import posix_ipc

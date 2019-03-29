@@ -7,9 +7,30 @@ from holodeck.environments import *
 from holodeck import sensors
 
 
+def boat_example():
+    """A basic example of using the ocean world"""
+    env = holodeck.make("Ocean")
+
+    cmd0 = np.array([0, 0, -2, 10])
+    cmd1 = np.array([10])
+    for i in range(10):
+        env.reset()
+        env.tick()
+        # env.set_ocean_state(13, 8, 180)
+        # env.set_aruco_code(False)
+
+        env.act("uav0", cmd0)
+        env.act("boat0", cmd1)
+        for _ in range(1000):
+            states = env.tick()
+            uav_location = states["uav0"]["LocationSensor"]
+            key_points = states["boat0"]["KeyPointsSensor"]
+            print(uav_location)
+
+
 def uav_example():
     """A basic example of how to use the UAV agent."""
-    env = holodeck.make("CyberPunkCity")
+    env = holodeck.make("Ocean")
 
     # This changes the control scheme for the uav
     env.agents["uav0"].set_control_scheme(ControlSchemes.UAV_ROLL_PITCH_YAW_RATE_ALT)
@@ -72,25 +93,6 @@ def android_example():
     # For a full list of sensors the android has, view the README
 
 
-def multi_agent_example():
-    """A basic example of using multiple agents"""
-    env = holodeck.make("UrbanCity")
-
-    cmd0 = np.array([0, 0, -2, 10])
-    cmd1 = np.array([0, 0, 5, 10])
-    for i in range(10):
-        env.reset()
-        # This will queue up a new agent to spawn into the environment, given that the coordinates are not blocked.
-        env.agents["uav0"].set_control_scheme(ControlSchemes.UAV_ROLL_PITCH_YAW_RATE_ALT)
-
-        env.tick()  # Tick the environment once so the second agent spawns before we try to interact with it.
-        env.act("uav0", cmd0)
-        for _ in range(1000):
-            states = env.tick()
-            uav0_terminal = states["uav0"]["Terminal"]
-            uav1_reward = states["uav1"]["Reward"]
-
-
 def world_command_examples():
     """A few examples to showcase commands for manipulating the worlds."""
     env = holodeck.make("MazeWorld")
@@ -138,51 +140,39 @@ def world_command_examples():
     env.reset()
 
 
+
 def editor_example():
     """This editor example shows how to interact with holodeck worlds while they are being built
     in the Unreal Engine. Most people that use holodeck will not need this.
     """
-    agent_sensors = [sensors.RGBCamera, sensors.LocationSensor, sensors.VelocitySensor]
-    agent = AgentDefinition("uav0", agents.UavAgent, agent_sensors)
-    env = HolodeckEnvironment([agent], start_world=False)
-    env.agents["uav0"].set_control_scheme(1)
-    command = [0, 0, 10, 50]
-
-    for i in range(10):
-        env.reset()
-        for _ in range(1000):
-            state, reward, terminal, _ = env.step(command)
-
-
-def editor_multi_agent_example():
-    """This editor example shows how to interact with holodeck worlds that have multiple agents.
-    This is specifically for when working with UE4 directly and not a prebuilt binary.
-    """
     agent_definitions = [
-        AgentDefinition("uav0", agents.UavAgent, [sensors.RGBCamera, sensors.LocationSensor]),
-        AgentDefinition("uav1", agents.UavAgent, [sensors.LocationSensor, sensors.VelocitySensor])
+        AgentDefinition("uav0", agents.UavAgent, ["RGBCamera", "LocationSensor"]),
+        AgentDefinition("boat0", agents.BoatAgent, ["LocationSensor", "KeyPointsSensor"])
     ]
+    #agent_definitions = []
+
     env = HolodeckEnvironment(agent_definitions, start_world=False)
 
-    cmd0 = np.array([0, 0, -2, 10])
-    cmd1 = np.array([0, 0, 5, 10])
-
+    wave_intensity, wave_size, wave_direction = 13, 1, 0
+    print("hello")
     for i in range(10):
         env.reset()
-        env.act("uav0", cmd0)
-        env.act("uav1", cmd1)
-        for _ in range(1000):
+        env.set_aruco_code(False)
+        #env.act("uav0", [0, 0, 0, 0])
+        #env.act("boat0", 20)
+        _ = env.tick()
+        #env.teleport("boat0", np.array([0, 0, 0]), [0, 0, 0])
+        env.set_state("uav0", [10, 0, 5000], [0, 0, 90], [0, 0, 0], [0, 0, 10000])
+        for _ in range(400):
             states = env.tick()
-
-            uav0_terminal = states["uav0"][sensors.Terminal]
-            uav1_reward = states["uav1"][sensors.Reward]
+            #print(states["boat0"]["KeyPointsSensor"][0])
 
 
 if __name__ == "__main__":
 
-    if 'DefaultWorlds' not in holodeck.installed_packages():
+    #if 'DefaultWorlds' not in holodeck.installed_packages():
         # This will install the binaries for the DefaultWorlds Package if it is not already installed.
-        holodeck.install("DefaultWorlds")
-        print(holodeck.package_info("DefaultWorlds"))
+     #   holodeck.install("DefaultWorlds")
+      #  print(holodeck.package_info("DefaultWorlds"))
 
-    editor_example()
+    boat_example()
