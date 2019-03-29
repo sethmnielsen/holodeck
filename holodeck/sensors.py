@@ -204,6 +204,18 @@ class PressureSensor(HolodeckSensor):
         return [48*(3+1)]
 
 
+class KeyPointsSensor(HolodeckSensor):
+
+    sensor_type = "KeyPointsSensor"
+
+    @property
+    def dtype(self):
+        return np.float32
+
+    @property
+    def data_shape(self):
+        return [8, 3]
+
 class SensorDefinition(object):
     __sensor_keys__ = {"RGBCamera": RGBCamera,
                        "TaskSensor": TaskSensor,
@@ -216,7 +228,8 @@ class SensorDefinition(object):
                        "RotationSensor": RotationSensor,
                        "VelocitySensor": VelocitySensor,
                        "PressureSensor": PressureSensor,
-                       "CollisionSensor": CollisionSensor}
+                       "CollisionSensor": CollisionSensor,
+                       "KeyPointsSensor": KeyPointsSensor}
 
     def __init__(self, agent_name, sensor_name, sensor_type, socket=""):
         self.agent_name = agent_name

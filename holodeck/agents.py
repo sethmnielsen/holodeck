@@ -382,6 +382,35 @@ class TurtleAgent(HolodeckAgent):
         np.copyto(self._action_buffer, action)
 
 
+class BoatAgent(HolodeckAgent):
+    """A simple boat agent that moves along the ocean surface with a single forward force
+    Inherits from :obj:`HolodeckAgent`."""
+
+    Bow = 0
+    PortSide = 1
+    StarBoardSide = 2
+    LandingFrontLeft = 3
+    LandingFrontRight = 4
+    LandingBackRight = 5
+    LandingBackLeft = 6
+    Stern = 7
+
+    agent_type = "BoatAgent"
+
+    @property
+    def control_schemes(self):
+        return [("[forward_force]", ContinuousActionSpace([1]))]
+
+    def __repr__(self):
+        return "BoatAgent " + self.name
+
+    def __act__(self, action):
+        np.copyto(self._action_buffer, np.array(action))
+
+
+
+
+
 class AgentDefinition:
     """A class for declaring what agents are expected or should be spawned in a particular holodeck Environment
     Args:
@@ -394,7 +423,8 @@ class AgentDefinition:
         "SphereAgent": SphereAgent,
         "UavAgent": UavAgent,
         "NavAgent": NavAgent,
-        "AndroidAgent": AndroidAgent
+        "AndroidAgent": AndroidAgent,
+        "BoatAgent": BoatAgent
     }
 
     def __init__(self, agent_name, agent_type, sensors=None):
