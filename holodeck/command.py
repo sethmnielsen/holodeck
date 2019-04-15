@@ -269,3 +269,63 @@ class TeleportCameraCommand(Command):
         rotation: A three dimensional array representing rotation in x,y,z
         """
         self.add_number_parameters(rotation)
+
+
+class SetOceanStateCommand(Command):
+    def __init__(self, wave_intensity, wave_size, wave_direction):
+        """Sets the command type to SetOceanState.
+        :param wave_intensity: The intensity of the waves (1-13)
+        :param wave_size: The size of the wave swells (1-8)
+        :param wave_direction: The direction of the waves
+        """
+        Command.__init__(self)
+        self._command_type = "SetOceanState"
+        self.set_wave_intensity(wave_intensity)
+        self.set_wave_size(wave_size)
+        self.set_wave_direction(wave_direction)
+
+    @staticmethod
+    def is_valid_wave_intensity(intensity):
+        return isinstance(intensity, int) and 1 <= intensity <= 13
+
+    @staticmethod
+    def is_valid_wave_size(size):
+        return isinstance(size, int) and 1 <= size <= 8
+
+    def set_wave_intensity(self, wave_intensity):
+        """Set the wave intensity.
+        Positional Arguments:
+        wave_intensity: An integer between 1 and 18
+        """
+        self.add_number_parameters(wave_intensity)
+
+    def set_wave_size(self, wave_size):
+        """Set the wave_size.
+        Positional Arguments:
+        wave_size: An integer between 1 and 8
+        """
+        self.add_number_parameters(wave_size)
+
+    def set_wave_direction(self, wave_direction):
+        """Set the wave_direction.
+        Positional Arguments:
+        wave_direction: A float representing the direction of the waves
+        """
+        self.add_number_parameters(wave_direction)
+
+
+class SetArucoCodeCommand(Command):
+    def __init__(self, set):
+        """Sets the command type to SetArucoCode and initialized this object.
+        :param set: a boolean representing whether to set or unset the aruco code
+        """
+        Command.__init__(self)
+        self._command_type = "SetArucoCode"
+        self.set_to_set(set)
+
+    def set_to_set(self, set):
+        """
+        Positional Arguments:
+        location: a boolean representing whether to set or unset the aruco code
+        """
+        self.add_number_parameters(int(set))

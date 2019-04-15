@@ -16,6 +16,7 @@ class ControlSchemes(object):
             with forward, backward, right, and left.
         NAV_TARGET_LOCATION (int): Default NavAgent control scheme. Takes a target xyz coordinate.
         UAV_TORQUES (int): Default UAV control scheme. Takes torques for roll, pitch, and yaw, as well as thrust.
+        TODO: boat control scheme
         UAV_ROLL_PITCH_YAW_RATE_ALT (int): Control scheme for UAV. Takes roll, pitch, yaw rate, and altitude targets.
     """
     ANDROID_TORQUES = 0
@@ -25,6 +26,8 @@ class ControlSchemes(object):
     DISCRETE_SPHERE_DEFAULT = 0
 
     NAV_TARGET_LOCATION = 0
+
+    BOAT_FORWARD_FORCE_LOCATION = 0
 
     UAV_TORQUES = 0
     UAV_ROLL_PITCH_YAW_RATE_ALT = 1
@@ -256,3 +259,28 @@ class NavAgent(HolodeckAgent):
 
     def __act__(self, action):
         np.copyto(self._action_buffer, np.array(action) * 100)
+
+
+class BoatAgent(HolodeckAgent):
+    """A simple boat agent that moves along the ocean surface with a single forward force
+    Inherits from :obj:`HolodeckAgent`."""
+
+    Bow = 0
+    PortSide = 1
+    StarBoardSide = 2
+    LandingFrontLeft = 3
+    LandingFrontRight = 4
+    LandingBackRight = 5
+    LandingBackLeft = 6
+    Stern = 7
+
+    @property
+    def control_schemes(self):
+        return [("[forward_force]", ContinuousActionSpace([1]))]
+
+    def __repr__(self):
+        return "BoatAgent " + self.name
+
+    def __act__(self, action):
+        np.copyto(self._action_buffer, np.array(action))
+
