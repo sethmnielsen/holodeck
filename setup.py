@@ -1,17 +1,19 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open("README.md") as f:
     readme = f.read()
 
 setup(
     name="holodeck",
-    version="0.0.22",
+    version="0.2.2dev",
     description="High fidelity simulated environments for reinforcement learning",
     long_description=readme,
-    author="Joshua Greaves, Max Robinson, Nick Walton",
+    long_description_content_type="text/markdown",
+    author="Joshua Greaves, Max Robinson, Nick Walton, Jayden Milne",
     author_email="holodeck@cs.byu.edu",
     url="https://github.com/byu-pccl/holodeck",
-    packages=["holodeck"],
+    packages=find_packages('src'),
+    package_dir={'': 'src'},
     license='MIT License',
     python_requires=">=3",
     install_requires=[
