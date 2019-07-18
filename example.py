@@ -13,18 +13,16 @@ def boat_example():
     env = holodeck.make("Ocean-BoatLanding")
 
     cmd0 = np.array([0, 0, -2, 10])
-    cmd1 = np.array([0, 10])
+    cmd1 = np.array([90, 10]) # direction in degrees, speed
     for i in range(1):
         env.reset()
         env.tick()
-        # env.set_ocean_state(13, 8, 180)
-        # env.set_aruco_code(False)
 
-        # env.act("uav0", cmd0)
         env.act("boat0", cmd1)
         states = None
 
-        env.send_world_command("SetOceanState", num_params=[0, 0, 0])
+        # Wave height, wave intensity, wind direction. Kinda glitchy, don't go too high
+        env.send_world_command("SetOceanState", num_params=[2, 3, 90])
         env.rotate_sensor("uav0", "RGBCamera", [-90, 0, 0])
         env.send_world_command("DisableArucoCode")
         for _ in range(1000):
