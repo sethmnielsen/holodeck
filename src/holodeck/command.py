@@ -352,6 +352,23 @@ class RemoveSensorCommand(Command):
         self.add_string_parameters(sensor)
 
 
+class RotateSensorCommand(Command):
+    """Remove a sensor from an agent
+
+    Args:
+        agent (:obj:`str`): Name of agent to modify
+        sensor (:obj:`str`): Name of the sensor to remove
+
+
+    """
+    def __init__(self, agent, sensor, rotation):
+        Command.__init__(self)
+        self._command_type = "RotateSensor"
+        self.add_string_parameters(agent)
+        self.add_string_parameters(sensor)
+        self.add_number_parameters(rotation)
+
+
 class RenderViewportCommand(Command):
     """Enable or disable the viewport. Note that this does not prevent the viewport from being shown,
     it just prevents it from being updated. 

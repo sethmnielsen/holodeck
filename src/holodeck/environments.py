@@ -14,7 +14,7 @@ import numpy as np
 
 from holodeck.command import CommandCenter, SpawnAgentCommand, RGBCameraRateCommand, \
                              TeleportCameraCommand, RenderViewportCommand, RenderQualityCommand, \
-                             SetSensorEnabledCommand, CustomCommand, DebugDrawCommand
+                             SetSensorEnabledCommand, CustomCommand, DebugDrawCommand, RotateSensorCommand
 
 from holodeck.exceptions import HolodeckException
 from holodeck.holodeckclient import HolodeckClient
@@ -396,6 +396,15 @@ class HolodeckEnvironment:
         else:
             self.agents[agent_name].set_ticks_per_capture(ticks_per_capture)
             command_to_send = RGBCameraRateCommand(agent_name, ticks_per_capture)
+            self._enqueue_command(command_to_send)
+
+    def rotate_sensor(self, agent_name, sensor_name, rotation):
+        if agent_name not in self.agents:
+            print("No such agent %s" % agent_name)
+        elif sensor_name not in self.agents[agent_name].sensors:
+            print("No sensor %s on agent" % sensor_name)
+        else:
+            command_to_send = RotateSensorCommand(agent_name, sensor_name, rotation)
             self._enqueue_command(command_to_send)
 
     def draw_line(self, start, end, color=None, thickness=10.0):
