@@ -14,23 +14,37 @@ def boat_example():
 
     cmd0 = np.array([0, 0, -2, 10])
     cmd1 = np.array([90, 10]) # direction in degrees, speed
-    for i in range(1):
+    for i in range(5):
         env.reset()
         env.tick()
 
+        # The boat only needs to be told the command once
         env.act("boat0", cmd1)
         states = None
 
         # Wave height, wave intensity, wind direction. Kinda glitchy, don't go too high
         env.send_world_command("SetOceanState", num_params=[2, 3, 90])
+
+        # This will immediately set the rotation, there is no smooth transition
         env.rotate_sensor("uav0", "RGBCamera", [-90, 0, 0])
+
+        #  Aruco code is on by default
         env.send_world_command("DisableArucoCode")
+
+
         for _ in range(1000):
             states = env.tick()
-            print(states["boat0"]["Stern"])
-            print(states["boat0"]["Bow"])
+            boatstate = states["boat0"]
+            print(boatstate["Stern"])
+            print(boatstate["Bow"])
+            print(boatstate["Port"])
+            print(boatstate["StarBoard"])
+            print(boatstate["LandingFrontLeft"])
+            print(boatstate["LandingFrontRight"])
+            print(boatstate["LandingBackLeft"])
+            print(boatstate["LandingBackRight"])
 
-
+        # Print out the final frame
         pixels = states['uav0'][holodeck.sensors.RGBCamera.sensor_type]
         cv2.namedWindow("Camera Output")
         cv2.moveWindow("Camera Output", 500, 500)
@@ -39,89 +53,9 @@ def boat_example():
         cv2.destroyAllWindows()
 
 
-def uav_example():
-    """A basic example of how to use the UAV agent."""
-    env = holodeck.make("Ocean")
-
-
-    # This line can be used to change the control scheme for an agent
-    # env.agents["uav0"].set_control_scheme(ControlSchemes.UAV_ROLL_PITCH_YAW_RATE_ALT)
-
-    for i in range(10):
-        env.reset()\
-
-        # This command tells the UAV to not roll or pitch, but to constantly yaw left at 10m altitude.
-        command = np.array([0, 0, 2, 1000])
-        for _ in range(1000):
-            state, reward, terminal, _ = env.step(command)
-            # To access specific sensor data:
-            pixels = state["RGBCamera"]
-            velocity = state["VelocitySensor"]
-            # For a full list of sensors the UAV has, consult the configuration file "InfiniteForest-MaxDistance.json"
-
-    # You can control the AgentFollower camera (what you see) by pressing V to toggle spectator
-    # mode. This detaches the camera and allows you to move freely about the world.
-    # You can also press C to snap to the location of the camera to see the world from the perspective of the
-    # agent. See the Controls section of the ReadMe for more details.
-
-
-def sphere_example():
-    """A basic example of how to use the sphere agent."""
-    env = holodeck.make("MazeWorld-FinishMazeSphere")
-
-    # This command is to constantly rotate to the right
-    command = 2
-    for i in range(10):
-        env.reset()
-        for _ in range(1000):
-            state, reward, terminal, _ = env.step(command)
-
-            # To access specific sensor data:
-            pixels = state["RGBCamera"]
-            orientation = state["OrientationSensor"]
-
-    # For a full list of sensors the sphere robot has, view the README
-
-
-def android_example():
-    """A basic example of how to use the android agent."""
-    env = holodeck.make("AndroidPlayground-MaxDistance")
-
-    # The Android's command is a 94 length vector representing torques to be applied at each of his joints
-    command = np.ones(94) * 10
-    for i in range(10):
-        env.reset()
-        for j in range(1000):
-            if j % 50 == 0:
-                command *= -1
-
-            state, reward, terminal, _ = env.step(command)
-            # To access specific sensor data:
-            pixels = state["RGBCamera"]
-            orientation = state["OrientationSensor"]
-
-    # For a full list of sensors the android has, view the README
-
-
-def multi_agent_example():
-    """A basic example of using multiple agents"""
-    env = holodeck.make("CyberPunkCity-FollowSight")
-
-    cmd0 = np.array([0, 0, -2, 10])
-    cmd1 = np.array([0, 0, 0])
-    for i in range(10):
-        env.reset()
-        env.tick()
-        env.act("uav0", cmd0)
-        env.act("nav0", cmd1)
-        for _ in range(1000):
-            states = env.tick()
-            pixels = states["uav0"]["RGBCamera"]
-
-
 def world_command_examples():
     """A few examples to showcase commands for manipulating the worlds."""
-    env = holodeck.make("MazeWorld-FinishMazeSphere")
+    env = holodeck.make("Ocean-BoatLanding")
 
     # This is the unaltered MazeWorld
     for _ in range(300):
@@ -179,7 +113,6 @@ def editor_example():
     env = HolodeckEnvironment([agent_definitions], start_world=False)
 
     wave_intensity, wave_size, wave_direction = 13, 1, 0
-    print("hello")
     for i in range(10):
         env.reset()
         env.set_aruco_code(False)
@@ -192,7 +125,7 @@ def editor_example():
             states = env.tick()
             #print(states["boat0"]["KeyPointsSensor"][0])
 
-
+# this is for max
 def my_world():
     sensors = [SensorDefinition("boat0", "Bow", "LocationSensor", socket="Bow"), SensorDefinition("boat0", "Stern", "LocationSensor", socket="Stern")]
     agent_definitions = [AgentDefinition("boat0", agents.BoatAgent, sensors, existing=True)]
