@@ -345,7 +345,7 @@ class HolodeckEnvironment:
             angular velocity (:obj:`np.ndarray` or :obj:`list`): A new angular velocity for the
                 agent in **degrees**
         """
-        self.agents[agent_name].set_state(location, rotation, velocity, angular_velocity)
+        self.agents[agent_name].set_physics_state(location, rotation, velocity, angular_velocity)
 
     def _enqueue_command(self, command_to_send):
         self._command_center.enqueue_command(command_to_send)
