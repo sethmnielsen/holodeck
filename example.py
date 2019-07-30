@@ -22,11 +22,11 @@ def boat_example():
         env.act("boat0", cmd1)
         states = None
 
-        # Wave height, wave intensity, wind direction. Kinda glitchy, don't go too high
-        env.send_world_command("SetOceanState", num_params=[2, 3, 90])
+        # Wave height, wave intensity, wind direction. 1-12, 1-6, 0-360
+        env.send_world_command("SetOceanState", num_params=[11, 6, 90])
 
         # This will immediately set the rotation, there is no smooth transition
-        env.rotate_sensor("uav0", "RGBCamera", [-90, 0, 0])
+        env.rotate_sensor("uav0", "RGBCamera", [0, -90, 0])
 
         #  Aruco code is on by default
         env.send_world_command("DisableArucoCode")
@@ -125,29 +125,31 @@ def editor_example():
             states = env.tick()
             #print(states["boat0"]["KeyPointsSensor"][0])
 
+
 # this is for max
 def my_world():
-    sensors = [SensorDefinition("boat0", "Bow", "LocationSensor", socket="Bow"), SensorDefinition("boat0", "Stern", "LocationSensor", socket="Stern")]
-    agent_definitions = [AgentDefinition("boat0", agents.BoatAgent, sensors, existing=True)]
+    # sensors = [SensorDefinition("boat0", "Bow", "LocationSensor", socket="Bow"), SensorDefinition("boat0", "Stern", "LocationSensor", socket="Stern")]
+    # agent_definitions = [AgentDefinition("boat0", agents.BoatAgent, sensors, existing=True)]
 
     env = HolodeckEnvironment([], scenario=config, start_world=False)
 
-    for i in range(2):
+    for i in range(10):
         env.reset()
         env.act("boat0", [2, 3])
-        env.send_world_command("SetOceanState", num_params=[1, 1, 90])
+        env.send_world_command("SetOceanState", num_params=[3, 3, 90])
         # env.rotate_sensor("uav0", "RGBCamera", [-90, 0, 0])
         # env.send_world_command("DisableArucoCode")
-        for _ in range(5):
+        env.set_state("uav0", [100, 100, 100], [0, 0, 180], [0, 0, 0], [0, 0, 0])
+        for _ in range(100):
             states = env.tick()
         
-        states = env.tick()  
-        pixels = states['uav0'][holodeck.sensors.RGBCamera.sensor_type]
-        cv2.namedWindow("Camera Output")
-        cv2.moveWindow("Camera Output", 500, 500)
-        cv2.imshow("Camera Output", pixels[:, :, 0:3])
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        states = env.tick() 
+        pixels = states['uav0']["RGBCamera"]
+        # cv2.namedWindow("Camera Output")
+        # cv2.moveWindow("Camera Output", 500, 500)
+        # cv2.imshow("Camera Output", pixels[:, :, 0:3])
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":

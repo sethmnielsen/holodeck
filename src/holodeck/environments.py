@@ -64,7 +64,7 @@ class HolodeckEnvironment:
 
     """
 
-    def __init__(self, agent_definitions=None, binary_path=None, window_size=(720, 1280),
+    def __init__(self, agent_definitions=None, binary_path=None, window_size=None,
                  start_world=True, uuid="", gl_version=4, verbose=False, pre_start_steps=2,
                  show_viewport=True, ticks_per_sec=30, copy_state=True, scenario=None):
 
@@ -72,7 +72,17 @@ class HolodeckEnvironment:
             agent_definitions = []
 
         # Initialize variables
-        self._window_size = window_size
+
+        if window_size is None:
+            # Check if it has been configured in the scenario
+                if "window_height" in scenario:
+                    self._window_size = scenario["window_height"], scenario["window_width"]
+                else:
+                    # Default resolution
+                    self._window_size = 720, 1280
+        else:
+            self._window_size = window_size
+        
         self._uuid = uuid
         self._pre_start_steps = pre_start_steps
         self._copy_state = copy_state
@@ -104,9 +114,6 @@ class HolodeckEnvironment:
         self._state_dict = dict()
         self._agent = None
 
-        # Spawn agents not yet in the world.
-        # TODO implement this section for future build automation update
-
         # Set the default state function
         self.num_agents = len(self.agents)
 
@@ -117,6 +124,9 @@ class HolodeckEnvironment:
 
         self._client.acquire()
 
+        if os.name == "posix" and show_viewport == False:
+            self.should_render_viewport(False)
+        
         # Flag indicates if the user has called .reset() before .tick() and .step()
         self._initial_reset = False
         self.reset()
@@ -177,12 +187,14 @@ class HolodeckEnvironment:
                     'rotation': [0, 0, 0],
                     'socket': "",
                     'configuration': {},
-                    'sensor_name': sensor['sensor_type']
+                    'sensor_name': sensor['sensor_type'],
+                    'existing': False
                 }
                 # Overwrite the default values with what is defined in the scenario config
                 sensor_config.update(sensor)
 
                 sensors.append(SensorDefinition(agent['agent_name'],
+                                                agent['agent_type'],
                                                 sensor_config['sensor_name'],
                                                 sensor_config['sensor_type'],
                                                 socket=sensor_config['socket'],
@@ -200,7 +212,9 @@ class HolodeckEnvironment:
             agent_config.update(agent)
             agent_def = AgentDefinition(agent_config['agent_name'], agent_config['agent_type'],
                                         starting_loc=agent_config["location"],
-                                        starting_rot=agent_config["rotation"],  sensors=sensors, existing=agent_config["existing"])
+                                        starting_rot=agent_config["rotation"],
+                                        sensors=sensors, 
+                                        existing=agent_config["existing"])
 
             is_main_agent = False
             if "main_agent" in self._scenario:
@@ -255,12 +269,14 @@ class HolodeckEnvironment:
 
         return self._default_state_fn()
 
-    def step(self, action):
+    def step(self, action, ticks=1):
         """Supplies an action to the main agent and tells the environment to tick once.
         Primary mode of interaction for single agent environments.
 
         Args:
             action (:obj:`np.ndarray`): An action for the main agent to carry out on the next tick.
+            ticks (:obj:`int`): Number of times to step the environment wiht this action.
+                If ticks > 1, this function returns the last state generated.
 
         Returns:
             (:obj:`dict`, :obj:`float`, :obj:`bool`, info): A 4tuple:
@@ -273,15 +289,18 @@ class HolodeckEnvironment:
         if not self._initial_reset:
             raise HolodeckException("You must call .reset() before .step()")
 
-        if self._agent is not None:
-            self._agent.act(action)
+        for _ in range(ticks):
+            if self._agent is not None:
+                self._agent.act(action)
 
-        self._command_center.handle_buffer()
-        self._client.release()
-        self._client.acquire()
+            self._command_center.handle_buffer()
+            self._client.release()
+            self._client.acquire()
 
-        reward, terminal = self._get_reward_terminal()
-        return self._default_state_fn(), reward, terminal, None
+            reward, terminal = self._get_reward_terminal()
+            last_state = self._default_state_fn(), reward, terminal, None
+        
+        return last_state
 
     def act(self, agent_name, action):
         """Supplies an action to a particular agent, but doesn't tick the environment.
@@ -296,24 +315,29 @@ class HolodeckEnvironment:
         """
         self.agents[agent_name].act(action)
 
-    def tick(self):
+    def tick(self, num_ticks=1):
         """Ticks the environment once. Normally used for multi-agent environments.
-
+        Args:
+            num_ticks (:obj:`int`): Number of ticks to perform. Defaults to 1. 
         Returns:
             :obj:`dict`: A dictionary from agent name to its full state. The full state is another
                 dictionary from :obj:`holodeck.sensors.Sensors` enum to np.ndarray, containing the
                 sensors information for each sensor. The sensors always include the reward and
                 terminal sensors.
+
+                Will return the state from the last tick executed.
         """
         if not self._initial_reset:
             raise HolodeckException("You must call .reset() before .tick()")
 
-        self._command_center.handle_buffer()
+        for _ in range(num_ticks):
+            self._command_center.handle_buffer()
 
-        self._client.release()
-        self._client.acquire()
+            self._client.release()
+            self._client.acquire()
+            state = self._default_state_fn()
 
-        return self._default_state_fn()
+        return state
 
     def teleport(self, agent_name, location=None, rotation=None):
         """Teleports the target agent to any given location, and applies a specific rotation.
@@ -399,6 +423,16 @@ class HolodeckEnvironment:
             self._enqueue_command(command_to_send)
 
     def rotate_sensor(self, agent_name, sensor_name, rotation):
+        """Queues a rotate sensor command. It will be applied when :meth:`tick` or :meth:`step` is
+        called next.
+
+        The specified sensor on the specified agent will be immediately set to the given rotation
+
+        Args:
+            agent_name (:obj:`str`): Name of agent to modify
+            sensor_name (:obj:`str`): Name of the sensor to rotate
+            rotation (:obj:`list` of :obj:`float`): ``[roll, pitch, yaw]`` rotation for sensor.
+        """
         if agent_name not in self.agents:
             print("No such agent %s" % agent_name)
         elif sensor_name not in self.agents[agent_name].sensors:
@@ -556,7 +590,7 @@ class HolodeckEnvironment:
 
         self.send_world_command("SetWeather", string_params=[weather_type])
 
-    def teleport_camera(self, location, rotation):
+    def move_viewport(self, location, rotation):
         """Teleport the camera to the given location
 
         By the next tick, the camera's location and rotation will be updated
@@ -568,6 +602,7 @@ class HolodeckEnvironment:
                 (see :ref:`rotations`)
 
         """
+        # test_viewport_capture_after_teleport
         self._enqueue_command(TeleportCameraCommand(location, rotation))
 
     def should_render_viewport(self, render_viewport):
@@ -644,7 +679,7 @@ class HolodeckEnvironment:
             del environment['DISPLAY']
         self._world_process = \
             subprocess.Popen([binary_path, task_key, '-HolodeckOn', '-opengl' + str(gl_version),
-                              '-LOG=HolodeckLog.txt', '-ResX=' + str(self._window_size[1]),
+                              '-LOG=HolodeckLog.txt', '-ForceRes', '-ResX=' + str(self._window_size[1]),
                               '-ResY=' + str(self._window_size[0]), '--HolodeckUUID=' + self._uuid,
                               '-TicksPerSec=' + str(self._ticks_per_sec)],
                              stdout=out_stream,
@@ -667,7 +702,7 @@ class HolodeckEnvironment:
                                                        'Global\\HOLODECK_LOADING_SEM' + self._uuid)
         self._world_process = \
             subprocess.Popen([binary_path, task_key, '-HolodeckOn', '-LOG=HolodeckLog.txt',
-                              '-ResX=' + str(self._window_size[1]), '-ResY=' +
+                              '-ForceRes', '-ResX=' + str(self._window_size[1]), '-ResY=' +
                               str(self._window_size[0]), '-TicksPerSec=' + str(self._ticks_per_sec),
                               '--HolodeckUUID=' + self._uuid],
                              stdout=out_stream, stderr=out_stream)
