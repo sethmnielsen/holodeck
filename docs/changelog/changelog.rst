@@ -1,14 +1,60 @@
 Changelog
 =========
 
-Holodeck 0.2.2dev
---------------
-*Release Date TBD*
+.. Changelog Style Guide
+  - Each release should have a New Features / Changes / Bug Fixes section.
+  - Keep the first sentence of each point short and descriptive
+  - The passive voice should be avoided
+  - Try to make the first word a verb in past tense. Bug fixes should use 
+    "Fixed"
+  - Add a link to the issue describing the change or the pull request that 
+    merged it at the end in parentheses
 
-Features! Features! Features! 🍕
+Holodeck 0.3.0
+--------------
+*11/02/2019*
+
+This is a content release focused on improving the :ref:`android-agent` and
+adding more scenarios and tasks for it. We also added a new floating hand
+agent to provide a simpler agent that can do many of the dexterity tasks.
+
+Highlights
+~~~~~~~~~~
+- Added :ref:`dexterity-package` with new worlds and scenarios (see below for 
+  comprehensive listing)
+- Added :ref:`clean-up-task` and :ref:`cup-game-task` tasks
+- Added :ref:`hand-agent`
 
 New Features
 ~~~~~~~~~~~~
+- Added the :ref:`dexterity-package` with new worlds and scenarios:
+
+  - :ref:`playroom-world`
+
+    - :ref:`playroom-android`
+    - :ref:`playroom-hand`
+    - :ref:`playroom-standfromground`
+    - :ref:`playroom-standfromstanding`
+
+  - :ref:`clean-up-world`
+    (`#290 <https://github.com/BYU-PCCL/holodeck/issues/290>`_)
+
+    - :ref:`cleanup-groundandroid`
+    - :ref:`cleanup-groundhand`
+    - :ref:`cleanup-tableandroid`
+    - :ref:`cleanup-tablehand`
+  
+  - :ref:`cup-game-world`
+    (`#288 <https://github.com/BYU-PCCL/holodeck/issues/288>`_)
+    
+    - :ref:`cupgame-custom`
+    - :ref:`cupgame-easy`
+    - :ref:`cupgame-hard`
+
+  - :ref:`grip-world`
+
+    - :ref:`grip-liftbottle`
+
 - Added the :ref:`hand-agent` - a simplified Android hand that can float 
   around
   (`#287 <https://github.com/BYU-PCCL/holodeck/issues/287>`_)
@@ -17,10 +63,20 @@ New Features
     :class:`~holodeck.sensors.JointRotationSensor`,
     :class:`~holodeck.sensors.PressureSensor`,
     :class:`~holodeck.sensors.RelativeSkeletalPositionSensor`)
+
+- Added new tasks sensors for specific worlds
+
+  - :ref:`cup-game-task`
+    (`#318 <https://github.com/BYU-PCCL/holodeck/pull/318>`_)
+
+  - :ref:`clean-up-task`
+    (`#321 <https://github.com/BYU-PCCL/holodeck/pull/321>`_)
+
 - Packages can be installed directly from a URL
   (see :class:`~holodeck.packagemanager.install`)
   (`#129 <https://github.com/BYU-PCCL/holodeck/issues/129>`_)
-- Agent sensors can now be rotated at run time
+- Agent sensors can now be rotated at run time with
+  :meth:`~holodeck.sensors.HolodeckSensor.rotate`.
   (`#305 <https://github.com/BYU-PCCL/holodeck/issues/305>`_)
 - The config files can now specify whether an agent should be spawned
   (`#303 <https://github.com/BYU-PCCL/holodeck/pull/303>`_)
@@ -28,6 +84,9 @@ New Features
   following or the coordinates of the camera if it is detached (see
   :ref:`hotkeys`).
   (`#253 <https://github.com/BYU-PCCL/holodeck/issues/253>`_)
+- The viewport now follows the main agent as specified in the
+  config file by default.
+  (`#238 <https://github.com/BYU-PCCL/holodeck/issues/238>`_)
 - You can now specify the number of ticks you want to occur in the 
   :meth:`~holodeck.environments.HolodeckEnvironment.tick` and the 
   :meth:`~holodeck.environments.HolodeckEnvironment.step` methods,
@@ -57,6 +116,17 @@ Changes
   :class:`~holodeck.agents.HolodeckAgent` class. See the linked issue for 
   migration suggestions 👉
   (`#311 <https://github.com/BYU-PCCL/holodeck/issues/311>`_)
+- Removed the ``get/set_ticks_per_capture`` methods from the 
+  :class:`~holodeck.agents.HolodeckAgent` and 
+  :class:`~holodeck.environments.HolodeckEnvironment` classes, moved
+  :meth:`~holodeck.sensors.RGBCamera.set_ticks_per_capture` method to the
+  :class:`~holodeck.sensors.RGBCamera` class. 
+  (`#197 <https://github.com/BYU-PCCL/holodeck/issues/197>`_)
+- Viewport will now follow the main agent by default.
+  (`#238 <https://github.com/BYU-PCCL/holodeck/issues/238>`_)
+- Viewport will not be rendered when it is hidden (``show_viewport`` param in 
+  :class:`~holodeck.environments.HolodeckEnvironment`, Linux only)
+  (`#283 <https://github.com/BYU-PCCL/holodeck/issues/283>`_)
 
 Bug Fixes
 ~~~~~~~~~
@@ -76,7 +146,21 @@ Bug Fixes
 - Fixed agent spawn rotations being in the incorrect order. Fixed the
   documentation that specified the incorrect order as well (:ref:`rotations`)
   (`#309 <https://github.com/BYU-PCCL/holodeck/issues/309>`_)
-  
+- Fixed being unable to set the ticks per capture of a camera if it was not
+  named ``RGBCamera``.
+  (`#197 <https://github.com/BYU-PCCL/holodeck/issues/197>`_)
+- Fixed being unable to make a Holodeck window larger than the current screen
+  resolution 
+  (`#301 <https://github.com/BYU-PCCL/holodeck/issues/301>`_)
+- Fixed being unable to configure :class:`~holodeck.sensors.ViewportCapture`
+  sensor.
+  (`#301 <https://github.com/BYU-PCCL/holodeck/issues/301>`_)
+
+Known Issues
+~~~~~~~~~~~~
+- The TurtleAgent does not move consistently between Linux and Windows.
+  (`#336 <https://github.com/BYU-PCCL/holodeck/issues/336>`_)
+
 
 Holodeck 0.2.2
 --------------

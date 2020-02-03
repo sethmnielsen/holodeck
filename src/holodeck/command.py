@@ -196,13 +196,14 @@ class SpawnAgentCommand(Command):
 
     """
 
-    def __init__(self, location, rotation, name, agent_type):
+    def __init__(self, location, rotation, name, agent_type, is_main_agent=False):
         super(SpawnAgentCommand, self).__init__()
         self._command_type = "SpawnAgent"
         self.set_location(location)
         self.set_rotation(rotation)
         self.set_type(agent_type)
         self.set_name(name)
+        self.add_number_parameters(int(is_main_agent))
 
     def set_location(self, location):
         """Set where agent will be spawned.
@@ -404,13 +405,15 @@ class RGBCameraRateCommand(Command):
 
     Args:
         agent_name (:obj:`str`): name of the agent to modify
+        sensor_name (:obj:`str`): name of the sensor to modify
         ticks_per_capture (:obj:`int`): number of ticks between captures
 
     """
-    def __init__(self, agent_name, ticks_per_capture):
+    def __init__(self, agent_name, sensor_name, ticks_per_capture):
         Command.__init__(self)
         self._command_type = "RGBCameraRate"
         self.add_string_parameters(agent_name)
+        self.add_string_parameters(sensor_name)
         self.add_number_parameters(ticks_per_capture)
 
 

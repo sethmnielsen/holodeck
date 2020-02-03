@@ -103,14 +103,42 @@ def world_command_examples():
 
 def editor_example():
     """This editor example shows how to interact with holodeck worlds while they are being built
-    in the Unreal Engine. Most people that use holodeck will not need this.
-    """
-    agent_definitions = [
-        AgentDefinition("uav0", agents.UavAgent, ["RGBCamera", "LocationSensor"]),
-        AgentDefinition("boat0", agents.BoatAgent, ["LocationSensor", "KeyPointsSensor"])
-    ]
+    in the Unreal Engine Editor. Most people that use holodeck will not need this.
 
-    env = HolodeckEnvironment([agent_definitions], start_world=False)
+    This example uses a custom scenario, see 
+    https://holodeck.readthedocs.io/en/latest/usage/examples/custom-scenarios.html
+
+    Note: When launching Holodeck from the editor, press the down arrow next to "Play" and select
+    "Standalone Game", otherwise the editor will lock up when the client stops ticking it.
+    """
+
+    config = {
+        "name": "test",
+        "world": "TestWorld",
+        "main_agent": "uav0",
+        "agents": [
+            {
+                "agent_name": "uav0",
+                "agent_type": "UavAgent",
+                "sensors": [
+                    {
+                        "sensor_type": "LocationSensor",
+                    },
+                    {
+                        "sensor_type": "VelocitySensor"
+                    },
+                    {
+                        "sensor_type": "RGBCamera"
+                    }
+                ],
+                "control_scheme": 1,
+                "location": [0, 0, 1]
+            }
+        ]
+    }
+
+    env = HolodeckEnvironment(scenario=config, start_world=False)
+    command = [0, 0, 10, 50]
 
     wave_intensity, wave_size, wave_direction = 13, 1, 0
     for i in range(10):
@@ -126,12 +154,38 @@ def editor_example():
             #print(states["boat0"]["KeyPointsSensor"][0])
 
 
-# this is for max
-def my_world():
-    # sensors = [SensorDefinition("boat0", "Bow", "LocationSensor", socket="Bow"), SensorDefinition("boat0", "Stern", "LocationSensor", socket="Stern")]
-    # agent_definitions = [AgentDefinition("boat0", agents.BoatAgent, sensors, existing=True)]
+def editor_multi_agent_example():
+    """This editor example shows how to interact with holodeck worlds that have multiple agents.
+    This is specifically for when working with UE4 directly and not a prebuilt binary.
 
-    env = HolodeckEnvironment([], scenario=config, start_world=False)
+    Note: When launching Holodeck from the editor, press the down arrow next to "Play" and select
+    "Standalone Game", otherwise the editor will lock up when the client stops ticking it.
+    """
+    config = {
+        "name": "test_handagent",
+        "world": "TestWorld",
+        "main_agent": "hand0",
+        "agents": [
+            {
+                "agent_name": "uav0",
+                "agent_type": "UavAgent",
+                "sensors": [
+                ],
+                "control_scheme": 1,
+                "location": [0, 0, 1]
+            },
+            {
+                "agent_name": "uav1",
+                "agent_type": "UavAgent",
+                "sensors": [
+                ],
+                "control_scheme": 1,
+                "location": [0, 0, 5]
+            }
+        ]
+    }
+
+    env = HolodeckEnvironment(scenario=config, start_world=False)
 
     for i in range(10):
         env.reset()

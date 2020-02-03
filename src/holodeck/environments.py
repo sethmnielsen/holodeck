@@ -75,7 +75,7 @@ class HolodeckEnvironment:
 
         if window_size is None:
             # Check if it has been configured in the scenario
-                if "window_height" in scenario:
+                if scenario is not None and "window_height" in scenario:
                     self._window_size = scenario["window_height"], scenario["window_width"]
                 else:
                     # Default resolution
@@ -186,7 +186,7 @@ class HolodeckEnvironment:
                     'location': [0, 0, 0],
                     'rotation': [0, 0, 0],
                     'socket': "",
-                    'configuration': {},
+                    'configuration': None,
                     'sensor_name': sensor['sensor_type'],
                     'existing': False
                 }
@@ -210,15 +210,17 @@ class HolodeckEnvironment:
             }
 
             agent_config.update(agent)
+            is_main_agent = False
+            
+            if "main_agent" in self._scenario:
+                is_main_agent = self._scenario["main_agent"] == agent["agent_name"]
+
             agent_def = AgentDefinition(agent_config['agent_name'], agent_config['agent_type'],
                                         starting_loc=agent_config["location"],
                                         starting_rot=agent_config["rotation"],
-                                        sensors=sensors, 
-                                        existing=agent_config["existing"])
-
-            is_main_agent = False
-            if "main_agent" in self._scenario:
-                is_main_agent = self._scenario["main_agent"] == agent["agent_name"]
+                                        sensors=sensors,
+                                        existing=agent_config["existing"],
+                                        is_main_agent=is_main_agent)
 
             self.add_agent(agent_def, is_main_agent)
             self.agents[agent['agent_name']].set_control_scheme(agent['control_scheme'])
@@ -392,54 +394,18 @@ class HolodeckEnvironment:
         self._state_dict[agent_def.name] = self.agents[agent_def.name].agent_state_dict
 
         if not agent_def.existing:
-            command_to_send = SpawnAgentCommand(agent_def.starting_loc, agent_def.starting_rot, agent_def.name,
-                                                agent_def.type.agent_type)
+            command_to_send = SpawnAgentCommand(
+                location=agent_def.starting_loc,
+                rotation=agent_def.starting_rot,
+                name=agent_def.name,
+                agent_type=agent_def.type.agent_type,
+                is_main_agent=agent_def.is_main_agent
+            )
+
             self._client.command_center.enqueue_command(command_to_send)
         self.agents[agent_def.name].add_sensors(agent_def.sensors)
         if is_main_agent:
             self._agent = self.agents[agent_def.name]
-
-    def set_ticks_per_capture(self, agent_name, ticks_per_capture):
-        """Queues a rgb camera rate command. It will be applied when :meth:`tick` or :meth:`step` is
-        called next.
-
-        The specified agent's rgb camera will capture images every specified number of ticks.
-
-        The sensor's image will remain unchanged between captures.
-
-        This method must be called after every call to env.reset.
-
-        Args:
-            agent_name (:obj:`str`): The name of the agent whose rgb camera should be modified.
-            ticks_per_capture (:obj:`int`): The amount of ticks to wait between camera captures.
-        """
-        if not isinstance(ticks_per_capture, int) or ticks_per_capture < 1:
-            print("Ticks per capture value " + str(ticks_per_capture) + " invalid")
-        elif agent_name not in self.agents:
-            print("No such agent %s" % agent_name)
-        else:
-            self.agents[agent_name].set_ticks_per_capture(ticks_per_capture)
-            command_to_send = RGBCameraRateCommand(agent_name, ticks_per_capture)
-            self._enqueue_command(command_to_send)
-
-    def rotate_sensor(self, agent_name, sensor_name, rotation):
-        """Queues a rotate sensor command. It will be applied when :meth:`tick` or :meth:`step` is
-        called next.
-
-        The specified sensor on the specified agent will be immediately set to the given rotation
-
-        Args:
-            agent_name (:obj:`str`): Name of agent to modify
-            sensor_name (:obj:`str`): Name of the sensor to rotate
-            rotation (:obj:`list` of :obj:`float`): ``[roll, pitch, yaw]`` rotation for sensor.
-        """
-        if agent_name not in self.agents:
-            print("No such agent %s" % agent_name)
-        elif sensor_name not in self.agents[agent_name].sensors:
-            print("No sensor %s on agent" % sensor_name)
-        else:
-            command_to_send = RotateSensorCommand(agent_name, sensor_name, rotation)
-            self._enqueue_command(command_to_send)
 
     def draw_line(self, start, end, color=None, thickness=10.0):
         """Draws a debug line in the world
@@ -657,7 +623,7 @@ class HolodeckEnvironment:
         Args:
             name (:obj:`str`): The name of the command, ex "OpenDoor"
             num_params (obj:`list` of :obj:`int`): List of arbitrary number parameters
-            string_params (obj:`list` of :obj:`int`): List of arbitrary string parameters
+            string_params (obj:`list` of :obj:`string`): List of arbitrary string parameters
         """
         num_params = [] if num_params is None else num_params
         string_params = [] if string_params is None else string_params
