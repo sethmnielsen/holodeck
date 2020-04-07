@@ -20,7 +20,7 @@ Holodeck is a high-fidelity simulator for reinforcement learning built on top of
 ## Installation
 `pip install holodeck`
 
-(requires Python 3)
+(requires >= Python 3.5)
 
 See [Installation](https://holodeck.readthedocs.io/en/latest/usage/installation.html) for complete instructions (including Docker).
 
@@ -36,9 +36,10 @@ See [Installation](https://holodeck.readthedocs.io/en/latest/usage/installation.
 ## Usage Overview
 Holodeck's interface is similar to [OpenAI's Gym](https://gym.openai.com/). 
 
-We try and provide a "batteries included" approach to minimize the configuration you have to do.
+We try and provide a batteries included approach to let you jump right into using Holodeck, with minimal
+fiddling required.
 
-Here is a quick example using the `DefaultWorlds` package:
+To demonstrate, here is a quick example using the `DefaultWorlds` package:
 
 ```python
 import holodeck
@@ -65,9 +66,7 @@ If you want to access the data of a specific sensor, import sensors and
 retrieving the correct value from the state dictionary:
 
 ```python
-from holodeck.sensors import Sensors
-
-print(state[Sensors.LOCATION_SENSOR])
+print(state["LocationSensor"])
 ```
 
 ## Multi Agent-Environments
@@ -79,7 +78,10 @@ Calls to [`step`](https://holodeck.readthedocs.io/en/latest/holodeck/environment
 action has been provided, [`tick`](https://holodeck.readthedocs.io/en/latest/holodeck/environments.html#holodeck.environments.HolodeckEnvironment.tick) will advance the simulation forward. The action is persisted until another call to `act` provides a different action.
 
 ```python
-env = holodeck.make('CyberPunkCity-Follow')
+import holodeck
+import numpy as np
+
+env = holodeck.make("CyberPunkCity-Follow")
 env.reset()
 
 # Provide an action for each agent
@@ -88,16 +90,18 @@ env.act('nav0', np.array([0, 0, 0]))
 
 # Advance the simulation
 for i in range(300):
-    # The action provided above is repeated
-    s = env.tick()
+  # The action provided above is repeated
+  states = env.tick()
 ```
 
 You can access the reward, terminal and location for a multi agent environment as follows:
 
-``` python
-s['uav0'][Sensors.REWARD]
-s['uav0'][Sensors.TERMINAL]
-s['uav0'][Sensors.LOCATION_SENSOR]
+```python
+task = states["uav0"]["FollowTask"]
+
+reward = task[0]
+terminal = task[1]
+location = states["uav0"]["LocationSensor"]
 ```
 
 (`uav0` comes from the [scenario configuration file](https://holodeck.readthedocs.io/en/latest/packages/docs/scenarios.html))
