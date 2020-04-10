@@ -652,13 +652,11 @@ class TurtleAgent(HolodeckAgent):
 
 
 class BoatAgent(HolodeckAgent):
-    """A simple turtle bot.
-
-    See :ref:`turtle-agent` for more details.
+    """A simple boat agent.
 
     **Action Space**:
 
-    ``[forward_force, rot_force]``
+    ``[direction (degrees), throttle (0-10)]``
 
     Inherits from :class:`HolodeckAgent`."""
 
@@ -666,7 +664,7 @@ class BoatAgent(HolodeckAgent):
 
     @property
     def control_schemes(self):
-        return [("[forward_force, rotation]", ContinuousActionSpace([2]))]
+        return [("[direction (degrees), throttle (0-10)]", ContinuousActionSpace([2]))]
 
     def __repr__(self):
         return "BoatAgent " + self.name
