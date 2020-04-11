@@ -1,3 +1,0 @@
-autodocsumm
-numpy
-posix_ipc
