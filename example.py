@@ -310,4 +310,4 @@ def editor_multi_agent_example():
 
 if __name__ == "__main__":
 
-    boat_example()
+    uav_example()
