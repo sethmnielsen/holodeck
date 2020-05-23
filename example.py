@@ -46,7 +46,7 @@ def boat_example():
         # The boat only needs to be told the command once
         env.act("uav0", cmd0)
         env.act("boat0", cmd1)
-        
+
         # env.agents['uav0'].uav.set_physics_state(pos, att, vel, omg)
         # env.agents['boat0'].uav.set_physics_state(pos, att, vel, omg)
         states = None
@@ -78,9 +78,67 @@ def boat_example():
             pixels = states['uav0'][holodeck.sensors.RGBCamera.sensor_type]
             cv2.imshow("Camera Output", pixels[:, :, 0:3])
             cv2.waitKey(1)
-            
+
         cv2.destroyAllWindows()
 
+def sphere_example():
+    """A basic example of how to use the sphere agent."""
+    env = holodeck.make("MazeWorld-FinishMazeSphere")
+
+    # This command is to constantly rotate to the right
+    command = 2
+    for i in range(10):
+        env.reset()
+        for _ in range(1000):
+            state, reward, terminal, _ = env.step(command)
+
+            # To access specific sensor data:
+            pixels = state["RGBCamera"]
+            orientation = state["OrientationSensor"]
+
+    # For a full list of sensors the sphere robot has, view the README
+
+
+def android_example():
+    """A basic example of how to use the android agent."""
+    env = holodeck.make("AndroidPlayground-MaxDistance")
+
+    # The Android's command is a 94 length vector representing torques to be applied at each of his joints
+    command = np.ones(94) * 10
+    for i in range(10):
+        env.reset()
+        for j in range(1000):
+            if j % 50 == 0:
+                command *= -1
+
+            state, reward, terminal, _ = env.step(command)
+            # To access specific sensor data:
+            pixels = state["RGBCamera"]
+            orientation = state["OrientationSensor"]
+
+    # For a full list of sensors the android has, view the README
+
+
+def multi_agent_example():
+    """A basic example of using multiple agents"""
+    env = holodeck.make("CyberPunkCity-SethTest")
+
+    cmd0 = np.array([0, 0, -2, 10])
+    cmd1 = np.array([10, 0, 0])
+    for i in range(10):
+        env.reset()
+        env.tick()
+        env.act("uav0", cmd0)
+        env.act("nav0", cmd1)
+        for _ in range(1000):
+            states = env.tick()
+
+            pixels = states["uav0"]["RGBCamera"]
+            location = states["uav0"]["LocationSensor"]
+
+            task = states["uav0"]["FollowTask"]
+            reward = task[0]
+            terminal = task[1]
 
 def world_command_examples():
     """A few examples to showcase commands for manipulating the worlds."""
@@ -134,7 +192,7 @@ def editor_example():
     """This editor example shows how to interact with holodeck worlds while they are being built
     in the Unreal Engine Editor. Most people that use holodeck will not need this.
 
-    This example uses a custom scenario, see 
+    This example uses a custom scenario, see
     https://holodeck.readthedocs.io/en/latest/usage/examples/custom-scenarios.html
 
     Note: When launching Holodeck from the editor, press the down arrow next to "Play" and select
@@ -237,7 +295,7 @@ def editor_example():
 
     env = HolodeckEnvironment(scenario=config, start_world=False)
     command = [0, 0, 0, 55]
-    
+
     wave_intensity, wave_size, wave_direction = 13, 1, 0
     for i in range(10):
         env.reset()
@@ -298,8 +356,8 @@ def editor_multi_agent_example():
         env.set_state("uav0", [100, 100, 100], [0, 0, 180], [0, 0, 0], [0, 0, 0])
         for _ in range(100):
             states = env.tick()
-        
-        states = env.tick() 
+
+        states = env.tick()
         pixels = states['uav0']["RGBCamera"]
         # cv2.namedWindow("Camera Output")
         # cv2.moveWindow("Camera Output", 500, 500)
