@@ -263,8 +263,8 @@ def editor_example():
                         "socket": "CameraSocket",
                         "rotation": [0.0, 0.0, 0.0],
                         "configuration": {
-                            "CaptureHeight": 600,
-                            "CaptureWidth": 800
+                            "CaptureHeight": 480,
+                            "CaptureWidth": 640
                         }
                     },
                     {
@@ -287,21 +287,19 @@ def editor_example():
                     }
                 ],
                 "control_scheme": 0,
-                "location": [0.0, 0.0, 5.1],
+                "location": [16.0, 0.0, 5.5],
                 "rotation": [0.0, 0.0, 0.0]
             }
         ]
     }
 
-    env = HolodeckEnvironment(scenario=config, start_world=False)
+    env = HolodeckEnvironment(scenario=config, start_world=False, verbose=True)
     command = [0, 0, 0, 55]
-
-    wave_intensity, wave_size, wave_direction = 13, 1, 0
     for i in range(10):
         env.reset()
         # env.act("uav0", command)
-        psi = 180
-        env.act("boat0", [psi,2])
+        psi = 0
+        env.act("boat0", [psi,-2])
         _ = env.tick()
         _ = env.tick()
         pos = np.array([20, 0, 0])
@@ -309,8 +307,14 @@ def editor_example():
         _ = env.tick()
         # env.set_state("uav0", [0, 0, 5], [0, 0, 0], [0, 0, 0], [0, 0, 0])
         env.agents["boat0"].set_physics_state(pos, rot, [0,0,0],[0,0,0])
+        env.send_world_command("SetOceanState", [1, 1, 0])
+        env.agents["uav0"].sensors["RGBCamera"].rotate([0, -90, 0])
         for _ in range(1000):
-            states = env.tick()
+            state = env.tick()
+            pixels = state["RGBCamera"]
+
+            cv2.imshow("Camera Output", pixels[:, :, 0:3])
+            cv2.waitKey(1)
             #print(states["boat0"]["KeyPointsSensor"][0])
 
 
@@ -368,4 +372,5 @@ def editor_multi_agent_example():
 
 if __name__ == "__main__":
 
-    uav_example()
+    # uav_example()
+    editor_example()
