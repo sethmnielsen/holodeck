@@ -33,6 +33,30 @@ def uav_example():
     # You can also press C to snap to the location of the camera to see the world from the perspective of the
     # agent. See the Controls section of the ReadMe for more details.
 
+def uav_cam_rotate():
+    env = holodeck.make('UrbanCity-RGBCam')
+    env.reset()
+
+    cmd0 = [0, 0, 0, 100]
+    env.act("uav0", cmd0)
+
+    uav = env.agents['uav0']
+    ang = [0,-45, 0]  # roll, pitch, yaw of camera in body frame (0,0,0 is pointing forward) [degrees]
+    uav.sensors['RGBCamera'].rotate(ang)
+
+    cv2.namedWindow('Camera Output')
+    cv2.moveWindow('Camera Output', 500, 500)
+
+    for _ in range(1000):
+        state = env.tick()
+
+        pixels = state['RGBCamera']
+        cv2.imshow('Camera Output', pixels[:, :, :3])
+        cv2.waitKey(1)
+
+    cv2.destroyAllWindows()
+
+
 def boat_example():
     """A basic example of using the ocean world"""
     env = holodeck.make("Ocean-BoatLanding")
@@ -370,7 +394,102 @@ def editor_multi_agent_example():
         # cv2.destroyAllWindows()
 
 
+def editor_infforest_example():
+    """This editor example shows how to interact with holodeck worlds while they are being built
+    in the Unreal Engine Editor. Most people that use holodeck will not need this.
+
+    This example uses a custom scenario, see
+    https://holodeck.readthedocs.io/en/latest/usage/examples/custom-scenarios.html
+
+    Note: When launching Holodeck from the editor, press the down arrow next to "Play" and select
+    "Standalone Game", otherwise the editor will lock up when the client stops ticking it.
+    """
+
+    config = {
+        "name": "MaxDistance",
+        "world": "InfiniteForest",
+        "main_agent": "uav0",
+        "agents":[
+            {
+                "agent_name": "uav0",
+                "agent_type": "UavAgent",
+                "sensors": [
+                    {
+                        "sensor_type": "RGBCamera",
+                        "socket": "CameraSocket",
+                        "configuration": {
+                            "CaptureHeight": 480,
+                            "CaptureWidth": 640
+                        }
+                    },
+                    {
+                        "sensor_type": "LocationSensor"
+                    },
+                    {
+                        "sensor_type": "RotationSensor"
+                    },
+                    {
+                        "sensor_type": "OrientationSensor"
+                    },
+                    {
+                        "sensor_type": "VelocitySensor"
+                    },
+                    {
+                        "sensor_type": "CollisionSensor"
+                    },
+                    {
+                        "sensor_type": "IMUSensor"
+                    },
+                    {
+                        "sensor_type": "AbuseSensor"
+                    },
+                    {
+                        "sensor_type": "RangeFinderSensor",
+                        "configuration": {
+                            "LaserCount": 5
+                        }
+                    },
+                    {
+                        "sensor_type": "DistanceTask",
+                        "configuration": {
+                            "Interval": 5,
+                            "GoalDistance": 1000,
+                            "MaximizeDistance": True
+                        }
+                    }
+                ],
+                "control_scheme": 0,
+                "location": [0.0, 0.0, 0.5],
+                "rotation": [0.0, 0.0, 0.0]
+            }
+        ],
+
+        "window_width":  1280,
+        "window_height": 720
+    }
+
+    env = HolodeckEnvironment(scenario=config, start_world=False, verbose=True)
+    command = [0, 0, 0, 0]
+    for i in range(10):
+        env.reset()
+        env.act("uav0", command)
+        _ = env.tick()
+        _ = env.tick()
+        # env.set_state("uav0", [0, 0, 5], [0, 0, 0], [0, 0, 0], [0, 0, 0])
+        env.agents["uav0"].sensors["RGBCamera"].rotate([0, -90, 0])
+        for _ in range(1000):
+            state = env.tick()
+            pixels = state["RGBCamera"]
+
+            cv2.imshow("Camera Output", pixels[:, :, 0:3])
+            cv2.waitKey(1)
+            #print(states["boat0"]["KeyPointsSensor"][0])
+
+
+
 if __name__ == "__main__":
 
     # uav_example()
-    editor_example()
+    uav_cam_rotate()
+    # editor_example()
+    # editor_infforest_example()
