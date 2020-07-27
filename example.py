@@ -34,22 +34,21 @@ def uav_example():
     # agent. See the Controls section of the ReadMe for more details.
 
 def uav_cam_rotate():
-    env = holodeck.make('UrbanCity-RGBCam')
+    env = holodeck.make('UrbanCity-MaxDistance')
     env.reset()
 
     cmd0 = [0, 0, 0, 100]
-    env.act("uav0", cmd0)
+    env.act('uav0', cmd0)
 
     uav = env.agents['uav0']
     ang = [0,-45, 0]  # roll, pitch, yaw of camera in body frame (0,0,0 is pointing forward) [degrees]
     uav.sensors['RGBCamera'].rotate(ang)
 
     cv2.namedWindow('Camera Output')
-    cv2.moveWindow('Camera Output', 500, 500)
+    # cv2.moveWindow('Camera Output', 500, 500)
 
     for _ in range(1000):
         state = env.tick()
-
         pixels = state['RGBCamera']
         cv2.imshow('Camera Output', pixels[:, :, :3])
         cv2.waitKey(1)
@@ -76,34 +75,35 @@ def boat_example():
         states = None
 
         # Wave height, wave intensity, wind direction. 1-12, 1-6, 0-360
-        env.send_world_command("SetOceanState", num_params=[10, 30, 0])
+        env.send_world_command("SetOceanState", num_params=[1, 1, 0])
 
         # This will immediately set the rotation, there is no smooth transition
         # env.rotate_sensor("uav0", "RGBCamera", [0, -90, 0])
 
         #  Aruco code is on by default
-        # env.send_world_command("DisableArucoCode")
+        env.send_world_command("DisableArucoCode")
 
-        cv2.namedWindow("Camera Output")
-        cv2.moveWindow("Camera Output", 500, 500)
+        # cv2.namedWindow("Camera Output")
+        # cv2.moveWindow("Camera Output", 500, 500)
 
         for _ in range(1000):
             states = env.tick()
-            # boatstate = states["boat0"]
-            # print(boatstate["Stern"])
-            # print(boatstate["Bow"])
-            # print(boatstate["Port"])
-            # print(boatstate["StarBoard"])
-            # print(boatstate["LandingFrontLeft"])
-            # print(boatstate["LandingFrontRight"])
-            # print(boatstate["LandingBackLeft"])
-            # print(boatstate["LandingBackRight"])
+            boat_state = states["boat0"]
+            # print(boat_state["Stern"])
+            # print(boat_state["Bow"])
+            # print(boat_state["Port"])
+            # print(boat_state["StarBoard"])
+            print(boat_state["LandingFrontLeft"])
+            print(boat_state["LandingFrontRight"])
+            print(boat_state["LandingBackLeft"])
+            print(boat_state["LandingBackRight"])
+            print(f'TYPE: {type(boat_state["LandingFrontLeft"])}')
 
-            pixels = states['uav0'][holodeck.sensors.RGBCamera.sensor_type]
-            cv2.imshow("Camera Output", pixels[:, :, 0:3])
-            cv2.waitKey(1)
+            pixels = states['uav0']['RGBCamera']
+            # cv2.imshow("Camera Output", pixels[:, :, 0:3])
+            # cv2.waitKey(1)
 
-        cv2.destroyAllWindows()
+        # cv2.destroyAllWindows()
 
 def sphere_example():
     """A basic example of how to use the sphere agent."""
@@ -323,7 +323,7 @@ def editor_example():
         env.reset()
         # env.act("uav0", command)
         psi = 0
-        env.act("boat0", [psi,-2])
+        env.act("boat0", [psi,12])
         _ = env.tick()
         _ = env.tick()
         pos = np.array([20, 0, 0])
@@ -492,5 +492,6 @@ if __name__ == "__main__":
 
     # uav_example()
     # uav_cam_rotate()
-    editor_example()
+    boat_example()
+    # editor_example()
     # editor_infforest_example()
