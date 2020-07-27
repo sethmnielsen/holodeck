@@ -229,6 +229,42 @@ def editor_example():
         "main_agent": "uav0",
         "agents": [
             {
+                "agent_name": "uav0",
+                "agent_type": "UavAgent",
+                "sensors": [
+                    {
+                        "sensor_type": "RGBCamera",
+                        "socket": "CameraSocket",
+                        "rotation": [0.0, 0.0, 0.0],
+                        "configuration": {
+                            "CaptureWidth": 640,
+                            "CaptureHeight": 480
+                        }
+                    },
+                    {
+                        "sensor_type": "LocationSensor"
+                    },
+                    {
+                        "sensor_type": "OrientationSensor"
+                    },
+                    {
+                        "sensor_type": "RotationSensor"
+                    },
+                    {
+                        "sensor_type": "VelocitySensor"
+                    },
+                    {
+                        "sensor_type": "CollisionSensor"
+                    },
+                    {
+                        "sensor_type": "IMUSensor"
+                    }
+                ],
+                "control_scheme": 0,
+                "location": [0.0, 0.0, 5.5],
+                "rotation": [0.0, 0.0, 0.0]
+            },
+            {
                 "agent_name": "boat0",
                 "agent_type": "BoatAgent",
                 "existing": True,
@@ -277,49 +313,13 @@ def editor_example():
                 "control_scheme": 0,
                 "location": [20.0, 0.0, 5.0],
                 "rotation": [90.0, 0.0, 0.0]
-            },
-            {
-                "agent_name": "uav0",
-                "agent_type": "UavAgent",
-                "sensors": [
-                    {
-                        "sensor_type": "RGBCamera",
-                        "socket": "CameraSocket",
-                        "rotation": [0.0, 0.0, 0.0],
-                        "configuration": {
-                            "CaptureHeight": 480,
-                            "CaptureWidth": 640
-                        }
-                    },
-                    {
-                        "sensor_type": "LocationSensor"
-                    },
-                    {
-                        "sensor_type": "OrientationSensor"
-                    },
-                    {
-                        "sensor_type": "RotationSensor"
-                    },
-                    {
-                        "sensor_type": "VelocitySensor"
-                    },
-                    {
-                        "sensor_type": "CollisionSensor"
-                    },
-                    {
-                        "sensor_type": "IMUSensor"
-                    }
-                ],
-                "control_scheme": 0,
-                "location": [16.0, 0.0, 5.5],
-                "rotation": [0.0, 0.0, 0.0]
             }
         ]
     }
 
     env = HolodeckEnvironment(scenario=config, start_world=False, verbose=True)
     command = [0, 0, 0, 55]
-    for i in range(10):
+    for i in range(100):
         env.reset()
         # env.act("uav0", command)
         psi = 0
@@ -331,15 +331,16 @@ def editor_example():
         _ = env.tick()
         # env.set_state("uav0", [0, 0, 5], [0, 0, 0], [0, 0, 0], [0, 0, 0])
         env.agents["boat0"].set_physics_state(pos, rot, [0,0,0],[0,0,0])
-        env.send_world_command("SetOceanState", [1, 1, 0])
-        env.agents["uav0"].sensors["RGBCamera"].rotate([0, -90, 0])
-        for _ in range(1000):
+        env.send_world_command("SetOceanState", [3, 3, 0])
+        # env.agents["uav0"].sensors["RGBCamera"].rotate([0, -90, 0])
+        for _ in range(10000):
             state = env.tick()
-            pixels = state["RGBCamera"]
+            # time.sleep(0.1)
+            pixels = state['uav0']["RGBCamera"]
 
-            cv2.imshow("Camera Output", pixels[:, :, 0:3])
-            cv2.waitKey(1)
-            #print(states["boat0"]["KeyPointsSensor"][0])
+            # cv2.imshow("Camera Output", pixels[:, :, 0:3])
+            # cv2.waitKey(1)
+            # print(states["boat0"]["KeyPointsSensor"][0])
 
 
 def editor_multi_agent_example():
@@ -490,6 +491,6 @@ def editor_infforest_example():
 if __name__ == "__main__":
 
     # uav_example()
-    uav_cam_rotate()
-    # editor_example()
+    # uav_cam_rotate()
+    editor_example()
     # editor_infforest_example()
