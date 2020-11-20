@@ -370,7 +370,7 @@ class HolodeckEnvironment:
     def tick(self, num_ticks=1):
         """Ticks the environment once. Normally used for multi-agent environments.
         Args:
-            num_ticks (:obj:`int`): Number of ticks to perform. Defaults to 1. 
+            num_ticks (:obj:`int`): Number of ticks to perform. Defaults to 1.
         Returns:
             :obj:`dict`: A dictionary from agent name to its full state. The full state is another
                 dictionary from :obj:`holodeck.sensors.Sensors` enum to np.ndarray, containing the
@@ -457,10 +457,10 @@ class HolodeckEnvironment:
         if is_main_agent:
             self._agent = self.agents[agent_def.name]
 
-    def spawn_prop(self, prop_type, location=None, rotation=None, scale=1, 
+    def spawn_prop(self, prop_type, location=None, rotation=None, scale=1,
                     sim_physics=False, material="", tag=""):
-        """Spawns a basic prop object in the world like a box or sphere. 
-        
+        """Spawns a basic prop object in the world like a box or sphere.
+
         Prop will not persist after environment reset.
 
         Args:
@@ -559,7 +559,7 @@ class HolodeckEnvironment:
         """Draws a debug point in the world
 
         Args:
-            loc (:obj:`list` of :obj:`float`): The ``[x, y, z]`` start of the box. 
+            loc (:obj:`list` of :obj:`float`): The ``[x, y, z]`` start of the box.
                 (see :ref:`coordinate-system`)
             color (:obj:`list` of :obj:`float`): ``[r, g, b]`` color value
             thickness (:obj:`float`): thickness of the point
@@ -593,7 +593,7 @@ class HolodeckEnvironment:
 
     def set_render_quality(self, render_quality):
         """Adjusts the rendering quality of Holodeck.
-        
+
         Args:
             render_quality (:obj:`int`): An integer between 0 = Low Quality and 3 = Epic quality.
         """
@@ -618,7 +618,7 @@ class HolodeckEnvironment:
         A world command sends an abitrary command that may only exist in a specific world or
         package. It is given a name and any amount of string and number parameters that allow it to
         alter the state of the world.
-        
+
         If a command is sent that does not exist in the world, the environment will exit.
 
         Args:
@@ -653,10 +653,19 @@ class HolodeckEnvironment:
                              stderr=out_stream,
                              env=environment)
 
+        # self._world_process = \
+            # subprocess.Popen([binary_path, task_key, '-HolodeckOn', '-vulkan',
+                              # '-LOG=HolodeckLog.txt', '-ForceRes', '-ResX=' + str(self._window_size[1]),
+                              # '-ResY=' + str(self._window_size[0]), '--HolodeckUUID=' + self._uuid,
+                              # '-TicksPerSec=' + str(self._ticks_per_sec)],
+                             # stdout=out_stream,
+                             # stderr=out_stream,
+                             # env=environment)
+
         atexit.register(self.__on_exit__)
 
         try:
-            loading_semaphore.acquire(10)
+            loading_semaphore.acquire(100)
         except posix_ipc.BusyError:
             raise HolodeckException("Timed out waiting for binary to load. Ensure that holodeck is "
                                     "not being run with root priveleges.")

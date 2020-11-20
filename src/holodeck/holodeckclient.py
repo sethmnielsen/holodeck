@@ -40,7 +40,7 @@ class HolodeckClient:
         import win32event
         semaphore_all_access = 0x1F0003
 
-        self.timeout = 5000 if self.should_timeout else win32event.INFINITE            
+        self.timeout = 5000 if self.should_timeout else win32event.INFINITE
 
         self._semaphore1 = \
             win32event.OpenSemaphore(semaphore_all_access, False,
@@ -54,7 +54,7 @@ class HolodeckClient:
 
             if result != win32event.WAIT_OBJECT_0:
                 raise TimeoutError("Timed out or error waiting for engine!")
-            
+
         def windows_release_semaphore(sem):
             win32event.ReleaseSemaphore(sem, 1)
 

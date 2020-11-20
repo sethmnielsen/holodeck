@@ -93,11 +93,11 @@ def boat_example():
             # print(boat_state["Bow"])
             # print(boat_state["Port"])
             # print(boat_state["StarBoard"])
-            print(boat_state["LandingFrontLeft"])
-            print(boat_state["LandingFrontRight"])
-            print(boat_state["LandingBackLeft"])
-            print(boat_state["LandingBackRight"])
-            print(f'TYPE: {type(boat_state["LandingFrontLeft"])}')
+            # print(boat_state["LandingFrontLeft"])
+            # print(boat_state["LandingFrontRight"])
+            # print(boat_state["LandingBackLeft"])
+            # print(boat_state["LandingBackRight"])
+            # print(f'TYPE: {type(boat_state["LandingFrontLeft"])}')
 
             pixels = states['uav0']['RGBCamera']
             # cv2.imshow("Camera Output", pixels[:, :, 0:3])
