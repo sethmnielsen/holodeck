@@ -19,7 +19,6 @@ def uav_example():
     for i in range(10):
         env.reset()
 
-        # This command tells the UAV to not roll or pitch, but to constantly yaw left at 10m altitude.
         command = np.array([0, 0, 0, 1000])
         for _ in range(1000):
             state, reward, terminal, _ = env.step(command)
@@ -78,13 +77,14 @@ def boat_example():
         env.send_world_command("SetOceanState", num_params=[1, 1, 0])
 
         # This will immediately set the rotation, there is no smooth transition
-        # env.rotate_sensor("uav0", "RGBCamera", [0, -90, 0])
+        uav = env.agents['uav0']
+        uav.sensors['RGBCamera'].rotate([0, -45, 0])
 
         #  Aruco code is on by default
         env.send_world_command("DisableArucoCode")
 
-        # cv2.namedWindow("Camera Output")
-        # cv2.moveWindow("Camera Output", 500, 500)
+        cv2.namedWindow("Camera Output")
+        cv2.moveWindow("Camera Output", 500, 500)
 
         for _ in range(1000):
             states = env.tick()
@@ -100,10 +100,10 @@ def boat_example():
             # print(f'TYPE: {type(boat_state["LandingFrontLeft"])}')
 
             pixels = states['uav0']['RGBCamera']
-            # cv2.imshow("Camera Output", pixels[:, :, 0:3])
-            # cv2.waitKey(1)
+            cv2.imshow("Camera Output", pixels[:, :, 0:3])
+            cv2.waitKey(1)
 
-        # cv2.destroyAllWindows()
+        cv2.destroyAllWindows()
 
 def sphere_example():
     """A basic example of how to use the sphere agent."""
