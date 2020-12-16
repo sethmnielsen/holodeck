@@ -650,6 +650,48 @@ class TurtleAgent(HolodeckAgent):
         np.copyto(self._action_buffer, np.array(action))
         np.copyto(self._action_buffer, action)
 
+class CustomAgent(HolodeckAgent):
+    """A custom agent.
+
+    See :ref:`turtle-agent` for more details.
+
+    **Action Space**:
+
+    ``[forward_force, rot_force]``
+
+    - ``forward_force`` is capped at 160 in either direction
+    - ``rot_force`` is capped at 35 either direction
+
+    Inherits from :class:`HolodeckAgent`.
+
+    """
+
+    # constants in CustomAgent.h in holodeck-engine
+    __MAX_THRUST = 160.0
+    __MIN_THRUST = -__MAX_THRUST
+
+    __MAX_YAW = 35.0
+    __MIN_YAW = -__MAX_YAW
+
+    agent_type = "CustomAgent"
+
+    @property
+    def control_schemes(self):
+        low = [self.__MIN_THRUST, self.__MIN_YAW]
+        high = [self.__MAX_THRUST, self.__MAX_YAW]
+        return [("[forward_force, rot_force]", ContinuousActionSpace([2], low=low, high=high))]
+
+    def get_joint_constraints(self, joint_name):
+        return None
+
+    def __repr__(self):
+        return "CustomAgent " + self.name
+
+    def __act__(self, action):
+        np.copyto(self._action_buffer, np.array(action))
+        np.copyto(self._action_buffer, action)
+
+
 class BoatAgent(HolodeckAgent):
     """A simple boat agent.
 
@@ -696,14 +738,16 @@ class AgentDefinition:
         "AndroidAgent": AndroidAgent,
         "BoatAgent": BoatAgent,
         "HandAgent": HandAgent,
-        "TurtleAgent": TurtleAgent
+        "TurtleAgent": TurtleAgent,
+        "CustomAgent": CustomAgent
     }
 
-    def __init__(self, agent_name, agent_type, sensors=None, starting_loc=(0, 0, 0),
+    def __init__(self, agent_name, agent_type, agent_mesh="Turtlebot", sensors=None, starting_loc=(0, 0, 0),
                  starting_rot=(0, 0, 0), existing=False, is_main_agent=False):
         self.starting_loc = starting_loc
         self.starting_rot = starting_rot
         self.existing = existing
+        self.agent_mesh = agent_mesh
         self.sensors = sensors or list()
         self.is_main_agent = is_main_agent
         for i, sensor_def in enumerate(self.sensors):

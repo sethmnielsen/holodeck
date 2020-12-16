@@ -212,6 +212,7 @@ class HolodeckEnvironment:
                 'location': [0, 0, 0],
                 'rotation': [0, 0, 0],
                 'agent_name': agent['agent_type'],
+                'agent_mesh': "Turtlebot",
                 'existing': False,
                 "location_randomization": [0, 0, 0],
                 "rotation_randomization": [0, 0, 0]
@@ -245,6 +246,7 @@ class HolodeckEnvironment:
             agent_rotation[2] += random.uniform(-d_yaw, d_yaw)
 
             agent_def = AgentDefinition(agent_config['agent_name'], agent_config['agent_type'],
+                                        agent_mesh=agent_config['agent_mesh'],
                                         starting_loc=agent_location,
                                         starting_rot=agent_rotation,
                                         sensors=sensors,
@@ -449,6 +451,7 @@ class HolodeckEnvironment:
                 rotation=agent_def.starting_rot,
                 name=agent_def.name,
                 agent_type=agent_def.type.agent_type,
+                agent_mesh=agent_def.agent_mesh,
                 is_main_agent=agent_def.is_main_agent
             )
 
@@ -506,7 +509,7 @@ class HolodeckEnvironment:
         if prop_type not in available_props:
             raise HolodeckException("{} not an available prop. Available prop types: {}".format(
                 prop_type, available_props))
-        if material not in available_materials and material is not "":
+        if material not in available_materials and material != "":
             raise HolodeckException("{} not an available material. Available material types: {}".format(
                 material, available_materials))
 
@@ -644,8 +647,18 @@ class HolodeckEnvironment:
         environment = dict(os.environ.copy())
         if not show_viewport and 'DISPLAY' in environment:
             del environment['DISPLAY']
+        # self._world_process = \
+        #     subprocess.Popen([binary_path, task_key, '-HolodeckOn', '-opengl' + str(gl_version),
+        #                       '-LOG=HolodeckLog.txt', '-ForceRes', '-ResX=' + str(self._window_size[1]),
+        #                       '-ResY=' + str(self._window_size[0]), '--HolodeckUUID=' + self._uuid,
+        #                       '-TicksPerSec=' + str(self._ticks_per_sec)],
+        #                      stdout=out_stream,
+        #                      stderr=out_stream,
+        #                      env=environment)
+
+
         self._world_process = \
-            subprocess.Popen([binary_path, task_key, '-HolodeckOn', '-opengl' + str(gl_version),
+            subprocess.Popen([binary_path, task_key, '-HolodeckOn', '-vulkan',
                               '-LOG=HolodeckLog.txt', '-ForceRes', '-ResX=' + str(self._window_size[1]),
                               '-ResY=' + str(self._window_size[0]), '--HolodeckUUID=' + self._uuid,
                               '-TicksPerSec=' + str(self._ticks_per_sec)],

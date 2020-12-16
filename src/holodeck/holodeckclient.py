@@ -1,7 +1,7 @@
 """The client used for subscribing shared memory between python and c++."""
 import os
 
-from holodeck.exceptions import HolodeckException
+from holodeck.exceptions import HolodeckException, TimeoutException
 from holodeck.shmem import Shmem
 
 class HolodeckClient:
@@ -75,14 +75,20 @@ class HolodeckClient:
         self.timeout = 30 if self.should_timeout else None
 
         def posix_acquire_semaphore(sem):
-            sem.acquire(self.timeout)
+            try:
+                sem.acquire(self.timeout)
+            except posix_ipc.BusyError:
+                raise TimeoutException("Timed out trying to acquire semaphore")
 
         def posix_release_semaphore(sem):
             sem.release()
 
         def posix_unlink():
-            posix_ipc.unlink_semaphore(self._semaphore1.name)
-            posix_ipc.unlink_semaphore(self._semaphore2.name)
+            try:
+                posix_ipc.unlink_semaphore(self._semaphore1.name)
+                posix_ipc.unlink_semaphore(self._semaphore2.name)
+            except posix_ipc.ExistentialError:
+                raise HolodeckException("Semaphore no longer exists")
             for shmem_block in self._memory.values():
                 shmem_block.unlink()
 
@@ -115,8 +121,8 @@ class HolodeckClient:
             :obj:`np.ndarray`: The numpy array that is positioned on the shared memory.
         """
         if key not in self._memory or \
-            self._memory[key].shape != shape or \
-            self._memory[key].dtype != dtype:
-                self._memory[key] = Shmem(key, shape, dtype, self._uuid)
+           self._memory[key].shape != shape or \
+           self._memory[key].dtype != dtype:
+            self._memory[key] = Shmem(key, shape, dtype, self._uuid)
 
         return self._memory[key].np_array
