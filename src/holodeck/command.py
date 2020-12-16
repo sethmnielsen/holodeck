@@ -196,13 +196,14 @@ class SpawnAgentCommand(Command):
 
     """
 
-    def __init__(self, location, rotation, name, agent_type, is_main_agent=False):
+    def __init__(self, location, rotation, name, agent_type, agent_mesh, is_main_agent=False):
         super(SpawnAgentCommand, self).__init__()
         self._command_type = "SpawnAgent"
         self.set_location(location)
         self.set_rotation(rotation)
         self.set_type(agent_type)
         self.set_name(name)
+        self.set_mesh(agent_mesh)
         self.add_number_parameters(int(is_main_agent))
 
     def set_location(self, location):
@@ -247,6 +248,15 @@ class SpawnAgentCommand(Command):
         if not isinstance(agent_type, str):
             agent_type = agent_type.agent_type  # Get str from type
         self.add_string_parameters(agent_type)
+
+    def set_mesh(self, agent_mesh):
+        """Set the static mesh of the agent.
+
+        Args:
+            agent_mesh (:obj:`str` or :obj:`type`): The name of the static mesh for the agent to spawn.
+
+        """
+        self.add_string_parameters(agent_mesh)
 
 
 class DebugDrawCommand(Command):
