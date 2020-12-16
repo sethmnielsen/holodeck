@@ -644,17 +644,8 @@ class HolodeckEnvironment:
         environment = dict(os.environ.copy())
         if not show_viewport and 'DISPLAY' in environment:
             del environment['DISPLAY']
-        # self._world_process = \
-        #     subprocess.Popen([binary_path, task_key, '-HolodeckOn', '-opengl' + str(gl_version),
-        #                       '-LOG=HolodeckLog.txt', '-ForceRes', '-ResX=' + str(self._window_size[1]),
-        #                       '-ResY=' + str(self._window_size[0]), '--HolodeckUUID=' + self._uuid,
-        #                       '-TicksPerSec=' + str(self._ticks_per_sec)],
-        #                      stdout=out_stream,
-        #                      stderr=out_stream,
-        #                      env=environment)
-
         self._world_process = \
-            subprocess.Popen([binary_path, task_key, '-HolodeckOn', '-vulkan',
+            subprocess.Popen([binary_path, task_key, '-HolodeckOn', '-opengl' + str(gl_version),
                               '-LOG=HolodeckLog.txt', '-ForceRes', '-ResX=' + str(self._window_size[1]),
                               '-ResY=' + str(self._window_size[0]), '--HolodeckUUID=' + self._uuid,
                               '-TicksPerSec=' + str(self._ticks_per_sec)],
@@ -665,7 +656,7 @@ class HolodeckEnvironment:
         atexit.register(self.__on_exit__)
 
         try:
-            loading_semaphore.acquire(100)
+            loading_semaphore.acquire(10)
         except posix_ipc.BusyError:
             raise HolodeckException("Timed out waiting for binary to load. Ensure that holodeck is "
                                     "not being run with root priveleges.")

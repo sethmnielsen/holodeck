@@ -122,11 +122,11 @@ class HolodeckAgent:
         Args:
             location (np.ndarray, optional): An array with three elements specifying the target
                 world coordinates ``[x, y, z]`` in meters (see :ref:`coordinate-system`).
-                
+
                 If ``None`` (default), keeps the current location.
             rotation (np.ndarray, optional): An array with three elements specifying roll, pitch,
                 and yaw in degrees of the agent.
-                
+
                 If ``None`` (default), keeps the current rotation.
 
         """
@@ -146,7 +146,7 @@ class HolodeckAgent:
             location (np.ndarray): New location (``[x, y, z]`` (see :ref:`coordinate-system`))
             rotation (np.ndarray): New rotation (``[roll, pitch, yaw]``, see (see :ref:`rotations`))
             velocity (np.ndarray): New velocity (``[x, y, z]`` (see :ref:`coordinate-system`))
-            angular_velocity (np.ndarray): New angular velocity (``[x, y, z]`` in **degrees** 
+            angular_velocity (np.ndarray): New angular velocity (``[x, y, z]`` in **degrees**
                 (see :ref:`coordinate-system`))
 
         """
@@ -485,7 +485,7 @@ class HandAgent(HolodeckAgent):
     three dimensions.
 
     See :ref:`hand-agent` for more details.
-    
+
     **Action Space:**
 
     23 or 26 dimensional vector of continuous values representing torques to be
@@ -493,7 +493,7 @@ class HandAgent(HolodeckAgent):
     :ref:`hand-joints`.
 
     Inherits from :class:`HolodeckAgent`.
-    
+
     """
     # constants in HandAgent.h in holodeck-engine
     __MAX_MOVEMENT_METERS = 0.5
@@ -580,11 +580,11 @@ class NavAgent(HolodeckAgent):
 
        **Action Space:**
 
-       Continuous control scheme of the form ``[x_target, y_target, z_target]``. 
+       Continuous control scheme of the form ``[x_target, y_target, z_target]``.
        (see :ref:`coordinate-system`)
 
        Inherits from :class:`HolodeckAgent`.
-       
+
     """
 
     # constants in NavAgent.h in holodeck-engine
@@ -617,14 +617,14 @@ class TurtleAgent(HolodeckAgent):
     **Action Space**:
 
     ``[forward_force, rot_force]``
-    
+
     - ``forward_force`` is capped at 160 in either direction
     - ``rot_force`` is capped at 35 either direction
 
     Inherits from :class:`HolodeckAgent`.
-    
+
     """
-    
+
     # constants in TurtleAgent.h in holodeck-engine
     __MAX_THRUST = 160.0
     __MIN_THRUST = -__MAX_THRUST
@@ -649,7 +649,6 @@ class TurtleAgent(HolodeckAgent):
     def __act__(self, action):
         np.copyto(self._action_buffer, np.array(action))
         np.copyto(self._action_buffer, action)
-
 
 class BoatAgent(HolodeckAgent):
     """A simple boat agent.
@@ -683,9 +682,9 @@ class AgentDefinition:
             reference.
         sensors (:class:`~holodeck.sensors.SensorDefinition` or class type (if no duplicate sensors)): A list of
             HolodeckSensors to read from this agent.
-        starting_loc (:obj:`list` of :obj:`float`): Starting ``[x, y, z]`` location for agent 
+        starting_loc (:obj:`list` of :obj:`float`): Starting ``[x, y, z]`` location for agent
             (see :ref:`coordinate-system`)
-        starting_rot (:obj:`list` of :obj:`float`): Starting ``[roll, pitch, yaw]`` rotation for agent 
+        starting_rot (:obj:`list` of :obj:`float`): Starting ``[roll, pitch, yaw]`` rotation for agent
             (see :ref:`rotations`)
         existing (:obj:`bool`): If the agent exists in the world or not (deprecated)
     """
