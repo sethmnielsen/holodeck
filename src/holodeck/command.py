@@ -354,7 +354,7 @@ class RotateSensorCommand(Command):
 
 class RenderViewportCommand(Command):
     """Enable or disable the viewport. Note that this does not prevent the viewport from being shown,
-    it just prevents it from being updated. 
+    it just prevents it from being updated.
 
     Args:
         render_viewport (:obj:`bool`): If viewport should be rendered
